@@ -167,10 +167,11 @@ public class MicroinstructionsComposite extends Composite {
 					"Please enter the number of microinstruction cycles you want to execute\n"
 							+ "(expect 5 mio. to take ~ 1 sec.)",
 					1);
-			if (input != null && input > 0)
-				executeNextN(input);
-			else
-				showError("Not a valid n: " + input);
+			if (input != null)
+				if (input > 0)
+					executeNextN(input);
+				else
+					showError("Not a valid n: " + input);
 		});
 		Button loadFile = new Button(toolbar, SWT.PUSH);
 		loadFile.setText("Load from File");
