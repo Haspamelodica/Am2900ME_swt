@@ -204,5 +204,4 @@ public class RegistersStatusComposite extends Composite {
 	private void machineChanged() {
 		machineStateChangedListenerManager.callAllListeners();
 	}
-
 }
