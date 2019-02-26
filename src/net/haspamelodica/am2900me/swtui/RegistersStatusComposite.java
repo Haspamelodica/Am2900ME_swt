@@ -140,6 +140,7 @@ public class RegistersStatusComposite extends Composite {
 		Runnable updateText = () -> item.setText(1, valueStringSupplier.apply(getValue.getAsInt()));
 		updateText.run();
 		machineStateChangedListenerManager.addListener(updateText);
+		item.addDisposeListener(e -> machineStateChangedListenerManager.removeListener(updateText));
 	}
 
 	private void createStatusItem(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals,
@@ -156,6 +157,7 @@ public class RegistersStatusComposite extends Composite {
 		Runnable updateText = () -> item.setText(1, String.valueOf(machine.getAm2904_01x4().isStatusSet(status)));
 		updateText.run();
 		machineStateChangedListenerManager.addListener(updateText);
+		item.addDisposeListener(e -> machineStateChangedListenerManager.removeListener(updateText));
 	}
 
 	private void createCursor(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals) {

@@ -187,7 +187,9 @@ public class MicroinstructionsComposite extends Composite {
 			machineChanged();
 		});
 		updateButtonLabels();
-		machineStateChangedListenerManager.addListener(this::updateButtonLabels);
+		Runnable updateButtonLabels = this::updateButtonLabels;
+		machineStateChangedListenerManager.addListener(updateButtonLabels);
+		addDisposeListener(e -> machineStateChangedListenerManager.removeListener(updateButtonLabels));
 
 		table = new Table(this, SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION);
 		setupTable();
@@ -221,6 +223,7 @@ public class MicroinstructionsComposite extends Composite {
 			};
 			updateItem.run();
 			machineStateChangedListenerManager.addListener(updateItem);
+			item.addDisposeListener(v -> machineStateChangedListenerManager.removeListener(updateItem));
 		});
 		TableCursor cursor = new TableCursor(table, SWT.NONE);
 		ControlEditor editor = new ControlEditor(cursor);

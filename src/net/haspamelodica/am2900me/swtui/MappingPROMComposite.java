@@ -66,6 +66,7 @@ public class MappingPROMComposite extends Composite {
 			Runnable updateTexts = () -> item.setText(1, hexIntConv3.toString(mprom.get(opcode)));
 			updateTexts.run();
 			machineStateChangedListenerManager.addListener(updateTexts);
+			item.addDisposeListener(v -> machineStateChangedListenerManager.removeListener(updateTexts));
 		});
 		TableCursor cursor = new TableCursor(table, SWT.NONE);
 		ControlEditor editor = new ControlEditor(cursor);

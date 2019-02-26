@@ -75,7 +75,9 @@ public class RAMComposite extends Composite {
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		ramPageParent.setLayoutData(parentData);
 		ramPageParent.setLayout(new FillLayout());
-		machineStateChangedListenerManager.addListener(this::updateRamPage);
+		Runnable updateRamPage = this::updateRamPage;
+		machineStateChangedListenerManager.addListener(updateRamPage);
+		addDisposeListener(e -> machineStateChangedListenerManager.removeListener(updateRamPage));
 
 		Table getWidthTable = new Table(ramPageParent, SWT.BORDER | SWT.FULL_SELECTION);
 		getWidthTable.setHeaderVisible(true);
@@ -130,6 +132,7 @@ public class RAMComposite extends Composite {
 					};
 					updateTexts.run();
 					machineStateChangedListenerManager.addListener(updateTexts);
+					item.addDisposeListener(v -> machineStateChangedListenerManager.removeListener(updateTexts));
 					changeListenersCurrentRamPage.add(updateTexts);
 				});
 				TableCursor cursor = new TableCursor(ramPageChildT, SWT.NONE);
