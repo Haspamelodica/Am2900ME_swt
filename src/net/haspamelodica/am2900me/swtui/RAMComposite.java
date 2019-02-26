@@ -1,7 +1,11 @@
 package net.haspamelodica.am2900me.swtui;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ControlEditor;
@@ -13,6 +17,7 @@ import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
@@ -26,9 +31,6 @@ import net.maisikoleni.am2900me.logic.MachineRAM;
 import net.maisikoleni.am2900me.util.HexIntStringConverter;
 
 public class RAMComposite extends Composite {
-
-	private static final String ERROR_NOT_IMPLEMENTED = "Not yet implemented in the SWT version...";
-
 	private static final HexIntStringConverter hexIntConv4 = HexIntStringConverter.forNibbles(4);
 
 	private final MachineRAM ram;
@@ -66,10 +68,10 @@ public class RAMComposite extends Composite {
 		});
 		Button loadFile = new Button(toolbar, SWT.PUSH);
 		loadFile.setText("Load from File");
-		loadFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
+		loadFile.addListener(SWT.Selection, e -> loadCSVFile());
 		Button saveFile = new Button(toolbar, SWT.PUSH);
 		saveFile.setText("Save to File");
-		saveFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
+		saveFile.addListener(SWT.Selection, e -> saveCSVFile());
 
 		ramPageParent = new Composite(this, SWT.NONE);
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -113,7 +115,7 @@ public class RAMComposite extends Composite {
 				Table ramPageChildT = new Table(ramPageParent, SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION);
 				ramPageChild = ramPageChildT;
 				ramPageChildT.setHeaderVisible(true);
-				ramPageChildT.setItemCount(256);
+				ramPageChildT.setItemCount(ram.cellCount() / 16);
 
 				TableUtil.createColumn(ramPageChildT, "Offset", 4);
 				for (int i = 0; i < 16; i++)
@@ -198,6 +200,96 @@ public class RAMComposite extends Composite {
 
 	private void machineChanged() {
 		machineStateChangedListenerManager.callAllListeners();
+	}
+
+	private void saveCSVFile() {
+		String filename = openFileDialog(SWT.SAVE);
+		if (filename != null)
+			try (PrintWriter out = new PrintWriter(filename)) {
+				for (int page = 0; page < ram.pageCount(); page++)
+					if (ram.isPageInUse(page))
+						for (int base = 0; base < ram.cellCount() / 16; base++) {
+							out.print(HexIntStringConverter.INT_16.toString(page * ram.cellCount() + base * 16));
+							for (int off = 0; off < 16; off++) {
+								out.print(',');
+								out.print(HexIntStringConverter.INT_16
+										.toString((int) ram.get(page * ram.cellCount() + base * 16 + off)));
+							}
+							out.println();
+						}
+			} catch (IOException e) {
+				showError("Unexpected IO error: " + e);
+			}
+	}
+
+	private void loadCSVFile() {
+		String filename = openFileDialog(SWT.OPEN);
+		if (filename != null) {
+			List<String> errorMessages = new ArrayList<>();
+			List<Integer> errorLines = new ArrayList<>();
+			try (Scanner in = new Scanner(new FileInputStream(filename))) {
+				int lineIndex = 0;
+				while (in.hasNextLine()) {
+					lineIndex++;
+					String line = in.nextLine().trim();
+					if (!line.equals("")) {
+						String[] properties = line.split("[,;]");
+						if (properties.length < 17) {
+							errorMessages.add("Not enough columns");
+							errorLines.add(lineIndex);
+						} else {
+							try {
+								boolean baseParsed;
+								int base = -1;
+								try {
+									base = Integer.decode(properties[0]);
+									baseParsed = true;
+								} catch (NumberFormatException e) {
+									errorMessages.add("Couldn't parse address base");
+									errorLines.add(lineIndex);
+									baseParsed = false;
+								}
+								if (baseParsed)
+									for (int off = 0; off < 16; off++) {
+										try {
+											int val = Integer.decode(properties[1 + off]);
+											if (val > 0xFFFF || val < 0) {
+												errorMessages.add("Out-of-bounds value; no change");
+												errorLines.add(lineIndex);
+											} else {
+												ram.set(base + off, (short) val);
+											}
+										} catch (NumberFormatException e) {
+											errorMessages.add("Couldn't parse value; no change");
+											errorLines.add(lineIndex);
+										}
+									}
+							} catch (Exception e) {
+								errorMessages.add("Unexpected error: " + e);
+								errorLines.add(lineIndex);
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				showError("Unexpected IO error: " + e);
+			}
+			if (!errorLines.isEmpty()) {
+				showError("Errors occurred during CSV parse.\n" + "First error: #" + errorLines.get(0) + ": "
+						+ errorMessages.get(0));
+			}
+		}
+		machineChanged();
+	}
+
+	private String openFileDialog(int style) {
+		FileDialog fd = new FileDialog(getShell(), style);
+		fd.setFilterExtensions(new String[] { "*.csv", "*.*" });
+		fd.setFilterNames(new String[] { "CSV files (*.csv)", "All files" });
+		if ((style & SWT.SAVE) != 0)
+			fd.setOverwrite(true);
+		String filename = fd.open();
+		return filename;
 	}
 
 	private void showError(String msg) {
