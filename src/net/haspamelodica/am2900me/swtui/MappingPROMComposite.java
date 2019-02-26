@@ -1,5 +1,13 @@
 package net.haspamelodica.am2900me.swtui;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ControlEditor;
 import org.eclipse.swt.custom.TableCursor;
@@ -8,6 +16,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -19,18 +28,21 @@ import net.maisikoleni.am2900me.logic.MappingPROM;
 import net.maisikoleni.am2900me.util.HexIntStringConverter;
 
 public class MappingPROMComposite extends Composite {
-	private static final String ERROR_NOT_IMPLEMENTED = "Not yet implemented in the SWT version...";
-
 	private static final HexIntStringConverter hexIntConv3 = HexIntStringConverter.forNibbles(3);
 
 	private final MappingPROM mprom;
 	private final ListenerManager machineStateChangedListenerManager;
+
+	private final String[] comments;
 
 	public MappingPROMComposite(Composite parent, Am2900Machine machine,
 			ListenerManager machineStateChangedListenerManager) {
 		super(parent, SWT.NONE);
 		this.mprom = machine.getmProm();
 		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
+
+		this.comments = new String[mprom.size()];
+		Arrays.fill(comments, "");
 
 		setLayout(new GridLayout());
 
@@ -39,10 +51,10 @@ public class MappingPROMComposite extends Composite {
 		toolbar.setLayout(new RowLayout());
 		Button loadFile = new Button(toolbar, SWT.PUSH);
 		loadFile.setText("Load from File");
-		loadFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
+		loadFile.addListener(SWT.Selection, e -> loadCSVFile());
 		Button saveFile = new Button(toolbar, SWT.PUSH);
 		saveFile.setText("Save to File");
-		saveFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
+		saveFile.addListener(SWT.Selection, e -> saveCSVFile());
 
 		setupTable();
 	}
@@ -62,8 +74,10 @@ public class MappingPROMComposite extends Composite {
 			int opcode = table.indexOf(item);
 
 			item.setText(0, HexIntStringConverter.forNibbles(2).toString(opcode));
-			item.setText(2, "");
-			Runnable updateTexts = () -> item.setText(1, hexIntConv3.toString(mprom.get(opcode)));
+			Runnable updateTexts = () -> {
+				item.setText(1, hexIntConv3.toString(mprom.get(opcode)));
+				item.setText(2, comments[opcode]);
+			};
 			updateTexts.run();
 			machineStateChangedListenerManager.addListener(updateTexts);
 			item.addDisposeListener(v -> machineStateChangedListenerManager.removeListener(updateTexts));
@@ -131,6 +145,89 @@ public class MappingPROMComposite extends Composite {
 
 	private void machineChanged() {
 		machineStateChangedListenerManager.callAllListeners();
+	}
+
+	private void saveCSVFile() {
+		String filename = openFileDialog(SWT.SAVE);
+		if (filename != null)
+			try (PrintWriter out = new PrintWriter(filename)) {
+				for (int opCode = 0; opCode < mprom.size(); opCode++) {
+					int addr = mprom.get(opCode);
+					out.print(HexIntStringConverter.INT_8.toString(opCode));
+					out.print(',');
+					out.print(HexIntStringConverter.INT_12.toString(addr));
+					out.print(',');
+					out.println(comments[opCode]);
+				}
+			} catch (IOException e) {
+				showError("Unexpected IO error: " + e);
+			}
+	}
+
+	private void loadCSVFile() {
+		String filename = openFileDialog(SWT.OPEN);
+		if (filename != null) {
+			List<String> errorMessages = new ArrayList<>();
+			List<Integer> errorLines = new ArrayList<>();
+			try (Scanner in = new Scanner(new FileInputStream(filename))) {
+				int lineIndex = 0;
+				while (in.hasNextLine()) {
+					lineIndex++;
+					String line = in.nextLine().trim();
+					if (!line.equals("")) {
+						String[] properties = line.split("[,;]");
+						// accept missing comment
+						if (properties.length < 2) {
+							errorMessages.add("Not enough properties");
+							errorLines.add(lineIndex);
+						} else {
+							try {
+								String comment = properties.length < 3 ? "" : properties[2];
+								boolean opcodeParsed;
+								int opcode = -1;
+								try {
+									opcode = Integer.decode(properties[0]);
+									opcodeParsed = true;
+								} catch (NumberFormatException e) {
+									errorMessages.add("Couldn't parse opcode");
+									errorLines.add(lineIndex);
+									opcodeParsed = false;
+								}
+								if (opcodeParsed)
+									try {
+										int addr = Integer.decode(properties[1]);
+										mprom.set(opcode, addr);
+										comments[opcode] = comment;
+									} catch (NumberFormatException e) {
+										errorMessages.add("Couldn't parse address");
+										errorLines.add(lineIndex);
+									}
+							} catch (Exception e) {
+								errorMessages.add("Unexpected error: " + e);
+								errorLines.add(lineIndex);
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				showError("Unexpected IO error: " + e);
+			}
+			if (!errorLines.isEmpty()) {
+				showError("Errors occurred during CSV parse.\n" + "First error: #" + errorLines.get(0) + ": "
+						+ errorMessages.get(0));
+			}
+		}
+		machineChanged();
+	}
+
+	private String openFileDialog(int style) {
+		FileDialog fd = new FileDialog(getShell(), style);
+		fd.setFilterExtensions(new String[] { "*.csv", "*.*" });
+		fd.setFilterNames(new String[] { "CSV files (*.csv)", "All files" });
+		if ((style & SWT.SAVE) != 0)
+			fd.setOverwrite(true);
+		String filename = fd.open();
+		return filename;
 	}
 
 	private void showError(String msg) {
