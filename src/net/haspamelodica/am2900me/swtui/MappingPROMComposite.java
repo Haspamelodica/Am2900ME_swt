@@ -5,6 +5,7 @@ import org.eclipse.swt.custom.ControlEditor;
 import org.eclipse.swt.custom.TableCursor;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
@@ -35,6 +36,7 @@ public class MappingPROMComposite extends Composite {
 
 		Composite toolbar = new Composite(this, SWT.NONE);
 		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+		toolbar.setLayout(new RowLayout());
 		Button loadFile = new Button(toolbar, SWT.PUSH);
 		loadFile.setText("Load from File");
 		loadFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
