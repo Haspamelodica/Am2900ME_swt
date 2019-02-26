@@ -129,13 +129,13 @@ public class MappingPROMComposite extends Composite {
 				text.addListener(SWT.FocusOut, e2 -> {
 					String comment = text.getText();
 					item.setText(2, comment);
-					comments[opcode]=comment;
+					comments[opcode] = comment;
 					text.dispose();
 				});
 				text.addListener(SWT.DefaultSelection, e2 -> {
 					String comment = text.getText();
 					item.setText(2, comment);
-					comments[opcode]=comment;
+					comments[opcode] = comment;
 					text.dispose();
 				});
 				editor.setEditor(text);
@@ -179,18 +179,18 @@ public class MappingPROMComposite extends Composite {
 					lineIndex++;
 					String line = in.nextLine().trim();
 					if (!line.equals("")) {
-						String[] properties = line.split("[,;]");
-						// accept missing comment
-						if (properties.length < 2) {
+						int opcodeEnd = findNextCSVDelim(line, 0);
+						if (opcodeEnd == -1) {
 							errorMessages.add("Not enough properties");
 							errorLines.add(lineIndex);
 						} else {
+							int addrEnd = findNextCSVDelim(line, opcodeEnd + 1);
 							try {
-								String comment = properties.length < 3 ? "" : properties[2];
+								String comment = addrEnd < 0 ? "" : line.substring(addrEnd + 1);
 								boolean opcodeParsed;
 								int opcode = -1;
 								try {
-									opcode = Integer.decode(properties[0]);
+									opcode = Integer.decode(line.substring(0, opcodeEnd));
 									opcodeParsed = true;
 								} catch (NumberFormatException e) {
 									errorMessages.add("Couldn't parse opcode");
@@ -199,7 +199,7 @@ public class MappingPROMComposite extends Composite {
 								}
 								if (opcodeParsed)
 									try {
-										int addr = Integer.decode(properties[1]);
+										int addr = Integer.decode(line.substring(opcodeEnd + 1, addrEnd));
 										mprom.set(opcode, addr);
 										comments[opcode] = comment;
 									} catch (NumberFormatException e) {
@@ -222,6 +222,12 @@ public class MappingPROMComposite extends Composite {
 			}
 		}
 		machineChanged();
+	}
+
+	private int findNextCSVDelim(String line, int start) {
+		int commaI = line.indexOf(',', start);
+		int semicolonI = line.indexOf(';', start);
+		return commaI == -1 ? semicolonI : semicolonI == -1 ? commaI : Math.min(commaI, semicolonI);
 	}
 
 	private String openFileDialog(int style) {
