@@ -127,11 +127,15 @@ public class MappingPROMComposite extends Composite {
 				text.setText(item.getText(2));
 				text.selectAll();
 				text.addListener(SWT.FocusOut, e2 -> {
-					item.setText(2, text.getText());
+					String comment = text.getText();
+					item.setText(2, comment);
+					comments[opcode]=comment;
 					text.dispose();
 				});
 				text.addListener(SWT.DefaultSelection, e2 -> {
-					item.setText(2, text.getText());
+					String comment = text.getText();
+					item.setText(2, comment);
+					comments[opcode]=comment;
 					text.dispose();
 				});
 				editor.setEditor(text);
