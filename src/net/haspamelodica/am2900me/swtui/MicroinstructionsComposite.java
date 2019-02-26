@@ -42,16 +42,21 @@ import net.maisikoleni.am2900me.util.NBitsUInt;
 public class MicroinstructionsComposite extends Composite {
 	private static final String ERROR_NOT_IMPLEMENTED = "Not yet implemented in the SWT version...";
 
-	private final static List<InstructionPropertyEditor> instructionEditors;
+	private final static List<InstructionProperty> instructionProperties;
 
-	private static class InstructionPropertyEditor {
+	private static class InstructionProperty {
+		private final String name;
+		private final int nibbles;
 		private final Function<MicroInstruction, String> getVal;
 		private final Predicate<String> checkVal;
 		private final BiFunction<MicroInstruction, String, MicroInstruction> setVal;
 		private final List<String> values;
 
-		private InstructionPropertyEditor(Function<MicroInstruction, String> getVal, Predicate<String> checkVal,
-				BiFunction<MicroInstruction, String, MicroInstruction> setVal, List<String> values) {
+		private InstructionProperty(String name, int nibbles, Function<MicroInstruction, String> getVal,
+				Predicate<String> checkVal, BiFunction<MicroInstruction, String, MicroInstruction> setVal,
+				List<String> values) {
+			this.name = name;
+			this.nibbles = nibbles;
 			this.getVal = getVal;
 			this.checkVal = checkVal;
 			this.setVal = setVal;
@@ -60,60 +65,66 @@ public class MicroinstructionsComposite extends Composite {
 
 	}
 
-	private static <E extends Enum<E>> InstructionPropertyEditor createIPE(Function<MicroInstruction, E> getVal,
+	private static <E extends Enum<E>> InstructionProperty createIP(String name, Function<MicroInstruction, E> getVal,
 			BiFunction<MicroInstruction, E, MicroInstruction> setVal) {
 		E defaultVal = getVal.apply(MicroInstruction.DEFAULT);
 		E[] values = defaultVal.getDeclaringClass().getEnumConstants();
 		List<String> valueNames = Arrays.stream(values).map(Object::toString).collect(Collectors.toList());
-		return new InstructionPropertyEditor(i -> getVal.apply(i).toString(), s -> valueNames.contains(s),
+		return new InstructionProperty(name, -1, i -> getVal.apply(i).toString(), s -> valueNames.contains(s),
 				(i, s) -> setVal.apply(i, values[valueNames.indexOf(s)]), valueNames);
 	}
 
-	private static <N extends NBitsUInt> InstructionPropertyEditor createIPE(Function<MicroInstruction, N> getVal,
-			IntFunction<N> createVal, BiFunction<MicroInstruction, N, MicroInstruction> setVal) {
-		return new InstructionPropertyEditor(i -> getVal.apply(i).toString(), s -> {
+	private static <N extends NBitsUInt> InstructionProperty createIP(String name, int nibbles,
+			Function<MicroInstruction, N> getVal, IntFunction<N> createVal,
+			BiFunction<MicroInstruction, N, MicroInstruction> setVal) {
+		int highestAllowedHighestOneBit = 1 << (4 * nibbles);
+		return new InstructionProperty(name, nibbles, i -> getVal.apply(i).toString(), s -> {
 			try {
-				Integer.decode(s);
+				int decoded = Integer.decode(s);
+				int highestOneBit = Integer.highestOneBit(decoded);
+				if (highestOneBit < 0)
+					highestOneBit = Integer.highestOneBit(~decoded) << 1;
+				return highestOneBit < highestAllowedHighestOneBit;
 			} catch (NumberFormatException x) {
 				return false;
 			}
-			return true;
-		}, (i, s) -> setVal.apply(i, createVal.apply(Integer.decode(s))), null);
+		}, (i, s) -> setVal.apply(i, createVal.apply(Integer.decode(s) & (highestAllowedHighestOneBit - 1))), null);
 	}
 
 	static {
-		ArrayList<InstructionPropertyEditor> iEsM = new ArrayList<>();
+		ArrayList<InstructionProperty> iEsM = new ArrayList<>();
 		iEsM.add(0, null);
-		iEsM.add(1, createIPE(MicroInstruction::getIe, MicroInstruction::withIe));
-		iEsM.add(2, createIPE(MicroInstruction::getInterrupt, Interrupt::new, MicroInstruction::withInterrupt));
-		iEsM.add(3, createIPE(MicroInstruction::getKmux, MicroInstruction::withKmux));
-		iEsM.add(4, createIPE(MicroInstruction::getK, Konst::new, MicroInstruction::withK));
-		iEsM.add(5, createIPE(MicroInstruction::getAm2901_Src, MicroInstruction::withAm2901_Src));
-		iEsM.add(6, createIPE(MicroInstruction::getAm2901_Func, MicroInstruction::withAm2901_Func));
-		iEsM.add(7, createIPE(MicroInstruction::getAm2901_Dest, MicroInstruction::withAm2901_Dest));
-		iEsM.add(8, createIPE(MicroInstruction::getRa_addr, RA_ADDR::new, MicroInstruction::withRa_addr));
-		iEsM.add(9, createIPE(MicroInstruction::getAsel, MicroInstruction::withAsel));
-		iEsM.add(10, createIPE(MicroInstruction::getRb_addr, RB_ADDR::new, MicroInstruction::withRb_addr));
-		iEsM.add(11, createIPE(MicroInstruction::getBsel, MicroInstruction::withBsel));
-		iEsM.add(12, createIPE(MicroInstruction::getAbus, MicroInstruction::withAbus));
-		iEsM.add(13, createIPE(MicroInstruction::getDbus, MicroInstruction::withDbus));
-		iEsM.add(14, createIPE(MicroInstruction::getAm2904_Carry, MicroInstruction::withAm2904_Carry));
-		iEsM.add(15,
-				createIPE(MicroInstruction::getAm2904_Shift, Am2904_Shift::new, MicroInstruction::withAm2904_Shift));
-		iEsM.add(16, createIPE(MicroInstruction::getCe_mu, MicroInstruction::withCe_mu));
-		iEsM.add(17, createIPE(MicroInstruction::getCe_m, MicroInstruction::withCe_m));
-		iEsM.add(18, createIPE(MicroInstruction::getAm2904_Inst, MicroInstruction::withAm2904_Inst));
-		iEsM.add(19, createIPE(MicroInstruction::getCcen, MicroInstruction::withCcen));
-		iEsM.add(20, createIPE(MicroInstruction::getAm2910_Inst, MicroInstruction::withAm2910_Inst));
-		iEsM.add(21, createIPE(MicroInstruction::getBar, BAR::new, MicroInstruction::withBar));
-		iEsM.add(22, createIPE(MicroInstruction::getBz_ld, MicroInstruction::withBz_ld));
-		iEsM.add(23, createIPE(MicroInstruction::getBz_ed, MicroInstruction::withBz_ed));
-		iEsM.add(24, createIPE(MicroInstruction::getBz_inc, MicroInstruction::withBz_inc));
-		iEsM.add(25, createIPE(MicroInstruction::getBz_ea, MicroInstruction::withBz_ea));
-		iEsM.add(26, createIPE(MicroInstruction::getIr_ld, MicroInstruction::withIr_ld));
-		iEsM.add(27, createIPE(MicroInstruction::getMwe, MicroInstruction::withMwe));
+		iEsM.add(1, createIP("IE", MicroInstruction::getIe, MicroInstruction::withIe));
+		iEsM.add(2, createIP("Interrupt", 1, MicroInstruction::getInterrupt, Interrupt::new,
+				MicroInstruction::withInterrupt));
+		iEsM.add(3, createIP("KMUX", MicroInstruction::getKmux, MicroInstruction::withKmux));
+		iEsM.add(4, createIP("Konst", 4, MicroInstruction::getK, Konst::new, MicroInstruction::withK));
+		iEsM.add(5, createIP("Am2901_Src", MicroInstruction::getAm2901_Src, MicroInstruction::withAm2901_Src));
+		iEsM.add(6, createIP("Am2901_Func", MicroInstruction::getAm2901_Func, MicroInstruction::withAm2901_Func));
+		iEsM.add(7, createIP("Am2901_Dest", MicroInstruction::getAm2901_Dest, MicroInstruction::withAm2901_Dest));
+		iEsM.add(8, createIP("RA_ADDR", 1, MicroInstruction::getRa_addr, RA_ADDR::new, MicroInstruction::withRa_addr));
+		iEsM.add(9, createIP("ASEL", MicroInstruction::getAsel, MicroInstruction::withAsel));
+		iEsM.add(10, createIP("RB_ADDR", 1, MicroInstruction::getRb_addr, RB_ADDR::new, MicroInstruction::withRb_addr));
+		iEsM.add(11, createIP("BSEL", MicroInstruction::getBsel, MicroInstruction::withBsel));
+		iEsM.add(12, createIP("_ABUS", MicroInstruction::getAbus, MicroInstruction::withAbus));
+		iEsM.add(13, createIP("_DBUS", MicroInstruction::getDbus, MicroInstruction::withDbus));
+		iEsM.add(14, createIP("Am2904_Carry", MicroInstruction::getAm2904_Carry, MicroInstruction::withAm2904_Carry));
+		iEsM.add(15, createIP("Am2904_Shift", 1, MicroInstruction::getAm2904_Shift, Am2904_Shift::new,
+				MicroInstruction::withAm2904_Shift));
+		iEsM.add(16, createIP("_CE_mu", MicroInstruction::getCe_mu, MicroInstruction::withCe_mu));
+		iEsM.add(17, createIP("_CE_m", MicroInstruction::getCe_m, MicroInstruction::withCe_m));
+		iEsM.add(18, createIP("Am2904_Inst", MicroInstruction::getAm2904_Inst, MicroInstruction::withAm2904_Inst));
+		iEsM.add(19, createIP("_CCEN", MicroInstruction::getCcen, MicroInstruction::withCcen));
+		iEsM.add(20, createIP("Am2910_Inst", MicroInstruction::getAm2910_Inst, MicroInstruction::withAm2910_Inst));
+		iEsM.add(21, createIP("BAR", 3, MicroInstruction::getBar, BAR::new, MicroInstruction::withBar));
+		iEsM.add(22, createIP("_BZ_LD", MicroInstruction::getBz_ld, MicroInstruction::withBz_ld));
+		iEsM.add(23, createIP("_BZ_ED", MicroInstruction::getBz_ed, MicroInstruction::withBz_ed));
+		iEsM.add(24, createIP("_BZ_INC", MicroInstruction::getBz_inc, MicroInstruction::withBz_inc));
+		iEsM.add(25, createIP("_BZ_EA", MicroInstruction::getBz_ea, MicroInstruction::withBz_ea));
+		iEsM.add(26, createIP("_IR_LD", MicroInstruction::getIr_ld, MicroInstruction::withIr_ld));
+		iEsM.add(27, createIP("_MWE", MicroInstruction::getMwe, MicroInstruction::withMwe));
 
-		instructionEditors = Collections.unmodifiableList(iEsM);
+		instructionProperties = Collections.unmodifiableList(iEsM);
 	}
 
 	private final Am2900Machine machine;
@@ -195,42 +206,17 @@ public class MicroinstructionsComposite extends Composite {
 		table.setHeaderVisible(true);
 		table.setItemCount(muProgMem.size());
 		TableUtil.createColumn(table, "Address", 3);
-		TableUtil.createColumn(table, "IE");
-		TableUtil.createColumn(table, "Interrupt");
-		TableUtil.createColumn(table, "KMUX");
-		TableUtil.createColumn(table, "Konst", 4);
-		TableUtil.createColumn(table, "Am2901_Src");
-		TableUtil.createColumn(table, "Am2901_Func");
-		TableUtil.createColumn(table, "Am2901_Dest");
-		TableUtil.createColumn(table, "RA_ADDR", 1);
-		TableUtil.createColumn(table, "ASEL");
-		TableUtil.createColumn(table, "RB_ADDR", 1);
-		TableUtil.createColumn(table, "BSEL");
-		TableUtil.createColumn(table, "_ABUS");
-		TableUtil.createColumn(table, "_DBUS");
-		TableUtil.createColumn(table, "Am2904_Carry");
-		TableUtil.createColumn(table, "Am2904_Shift", 1);
-		TableUtil.createColumn(table, "_CE_mu");
-		TableUtil.createColumn(table, "_CE_m");
-		TableUtil.createColumn(table, "Am2904_Inst");
-		TableUtil.createColumn(table, "_CCEN");
-		TableUtil.createColumn(table, "Am2910_Inst");
-		TableUtil.createColumn(table, "BAR", 3);
-		TableUtil.createColumn(table, "_BZ_LD");
-		TableUtil.createColumn(table, "_BZ_ED");
-		TableUtil.createColumn(table, "_BZ_INC");
-		TableUtil.createColumn(table, "_BZ_EA");
-		TableUtil.createColumn(table, "_IR_LD");
-		TableUtil.createColumn(table, "_MWE");
+		for (int i = 1; i < instructionProperties.size(); i++)
+			TableUtil.createColumn(table, instructionProperties.get(i).name, instructionProperties.get(i).nibbles);
 		table.addListener(SWT.SetData, e -> {
 			TableItem item = (TableItem) e.item;
 			int address = table.indexOf(item);
-			MicroInstruction instr = muProgMem.getInstruction(address);
 
 			item.setText(0, HexIntStringConverter.forNibbles(3).toString(address));
 			Runnable updateItem = () -> {
-				for (int i = 1; i < 28; i++)
-					item.setText(i, instructionEditors.get(i).getVal.apply(instr));
+				MicroInstruction instr = muProgMem.getInstruction(address);
+				for (int i = 1; i < instructionProperties.size(); i++)
+					item.setText(i, instructionProperties.get(i).getVal.apply(instr));
 				updateItemColor(item, address);
 			};
 			updateItem.run();
@@ -247,7 +233,7 @@ public class MicroinstructionsComposite extends Composite {
 			TableItem item = cursor.getRow();
 			int address = table.indexOf(item);
 			int column = cursor.getColumn();
-			InstructionPropertyEditor instrPropEditor = instructionEditors.get(column);
+			InstructionProperty instrPropEditor = instructionProperties.get(column);
 			if (instrPropEditor != null)
 				if (instrPropEditor.values == null) {
 					MicroInstruction instr = muProgMem.getInstruction(address);
@@ -307,7 +293,7 @@ public class MicroinstructionsComposite extends Composite {
 				item.setBackground(unchangedInstrBG);
 			else
 				item.setBackground(changedInstrUnchangedValueBG);
-			for (int col = 0; col < 28; col++)
+			for (int col = 0; col < instructionProperties.size(); col++)
 				if (!isInstrColumnUnchanged(instr, col))
 					item.setBackground(col, changedValueBG);
 				else
@@ -318,15 +304,13 @@ public class MicroinstructionsComposite extends Composite {
 	private boolean isInstrColumnUnchanged(MicroInstruction instr, int column) {
 		if (column == 0)
 			return true;
-		Function<MicroInstruction, ?> getVal = instructionEditors.get(column).getVal;
+		Function<MicroInstruction, ?> getVal = instructionProperties.get(column).getVal;
 		return getVal.apply(instr).equals(getVal.apply(MicroInstruction.DEFAULT));
 	}
 
 	private void updateInstr(int address, int column, TableItem item, String newVal) {
 		MicroInstruction instr = muProgMem.getInstruction(address);
-		muProgMem.setInstruction(address, instructionEditors.get(column).setVal.apply(instr, newVal));
-		updateItemColor(item, address);
-		item.setText(column, newVal);
+		muProgMem.setInstruction(address, instructionProperties.get(column).setVal.apply(instr, newVal));
 		machineChanged();
 	}
 
