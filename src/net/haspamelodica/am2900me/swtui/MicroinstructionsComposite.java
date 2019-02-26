@@ -1,9 +1,13 @@
 package net.haspamelodica.am2900me.swtui;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Scanner;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -20,6 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Table;
@@ -40,8 +45,6 @@ import net.maisikoleni.am2900me.util.HexIntStringConverter;
 import net.maisikoleni.am2900me.util.NBitsUInt;
 
 public class MicroinstructionsComposite extends Composite {
-	private static final String ERROR_NOT_IMPLEMENTED = "Not yet implemented in the SWT version...";
-
 	private final static List<InstructionProperty> instructionProperties;
 
 	private static class InstructionProperty {
@@ -175,10 +178,10 @@ public class MicroinstructionsComposite extends Composite {
 		});
 		Button loadFile = new Button(toolbar, SWT.PUSH);
 		loadFile.setText("Load from File");
-		loadFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
+		loadFile.addListener(SWT.Selection, e -> loadCSVFile());
 		Button saveFile = new Button(toolbar, SWT.PUSH);
 		saveFile.setText("Save to File");
-		saveFile.addListener(SWT.Selection, e -> showError(ERROR_NOT_IMPLEMENTED));
+		saveFile.addListener(SWT.Selection, e -> saveCSVFile());
 		Button reset = new Button(toolbar, SWT.PUSH);
 		reset.setText("Reset Machine State");
 		reset.addListener(SWT.Selection, e -> {
@@ -332,13 +335,6 @@ public class MicroinstructionsComposite extends Composite {
 		machineChanged();
 	}
 
-	private void showError(String msg) {
-		MessageBox msgBox = new MessageBox(getShell(), SWT.ICON_ERROR);
-		msgBox.setMessage(msg);
-		msgBox.setText("Error");
-		msgBox.open();
-	}
-
 	private void updateButtonLabels() {
 		if (machine.getCurrentMicroInstruction() == -1) {
 			execNext.setText("Startup machine");
@@ -351,5 +347,101 @@ public class MicroinstructionsComposite extends Composite {
 
 	private void machineChanged() {
 		machineStateChangedListenerManager.callAllListeners();
+	}
+
+	private void saveCSVFile() {
+		String filename = openFileDialog(SWT.SAVE);
+		if (filename != null)
+			try (PrintWriter out = new PrintWriter(filename)) {
+				for (int addr = 0; addr < muProgMem.size(); addr++) {
+					MicroInstruction instr = muProgMem.getInstruction(addr);
+					out.print(HexIntStringConverter.INT_12.toString(addr));
+					for (int col = 1; col < instructionProperties.size(); col++) {
+						out.print(',');
+						out.print(instructionProperties.get(instructionProperties.size() - col).getVal.apply(instr));
+					}
+					out.println();
+				}
+			} catch (IOException e) {
+				showError("Unexpected IO error: " + e);
+			}
+	}
+
+	private void loadCSVFile() {
+		String filename = openFileDialog(SWT.OPEN);
+		if (filename != null) {
+			List<String> errorMessages = new ArrayList<>();
+			List<Integer> errorLines = new ArrayList<>();
+			try (Scanner in = new Scanner(new FileInputStream(filename))) {
+				int lineIndex = 0;
+				while (in.hasNextLine()) {
+					lineIndex++;
+					String line = in.nextLine().trim();
+					if (!line.equals("")) {
+						String[] properties = line.split("[,;]");
+						if (properties.length < instructionProperties.size()) {
+							errorMessages.add("Not enough properties");
+							errorLines.add(lineIndex);
+						} else {
+							try {
+								boolean addrParsed;
+								int addr = -1;
+								try {
+									addr = Integer.decode(properties[0]);
+									addrParsed = true;
+								} catch (NumberFormatException e) {
+									errorMessages.add("Couldn't parse target address");
+									errorLines.add(lineIndex);
+									addrParsed = false;
+								}
+								if (addrParsed) {
+									MicroInstruction instr = MicroInstruction.DEFAULT;
+									for (int col = 1; col < instructionProperties.size(); col++) {
+										String propStr = properties[col];
+										InstructionProperty propDef = instructionProperties
+												.get(instructionProperties.size() - col);
+										if (propDef.checkVal.test(propStr))
+											instr = propDef.setVal.apply(instr, propStr);
+										else {
+											errorMessages.add("Illegal property for col " + col + " (" + propDef.name
+													+ "): \"" + propStr + "\". Using default");
+											errorLines.add(lineIndex);
+										}
+									}
+									muProgMem.setInstruction(addr, instr);
+								}
+							} catch (Exception e) {
+								errorMessages.add("Unexpected error: " + e);
+								errorLines.add(lineIndex);
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				showError("Unexpected IO error: " + e);
+			}
+			if (!errorLines.isEmpty()) {
+				showError("Errors occurred during CSV parse.\n" + "First error: #" + errorLines.get(0) + ": "
+						+ errorMessages.get(0));
+			}
+		}
+		machineChanged();
+	}
+
+	private String openFileDialog(int style) {
+		FileDialog fd = new FileDialog(getShell(), style);
+		fd.setFilterExtensions(new String[] { "*.csv", "*.*" });
+		fd.setFilterNames(new String[] { "CSV files (*.csv)", "All files" });
+		if ((style & SWT.SAVE) != 0)
+			fd.setOverwrite(true);
+		String filename = fd.open();
+		return filename;
+	}
+
+	private void showError(String msg) {
+		MessageBox msgBox = new MessageBox(getShell(), SWT.ICON_ERROR);
+		msgBox.setMessage(msg);
+		msgBox.setText("Error");
+		msgBox.open();
 	}
 }
