@@ -1,5 +1,6 @@
 package net.haspamelodica.am2900me.swtui;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -31,7 +32,7 @@ public class RAMComposite extends Composite {
 	private static final HexIntStringConverter hexIntConv4 = HexIntStringConverter.forNibbles(4);
 
 	private final MachineRAM ram;
-	private final List<Runnable> machineStateChangedListeners;
+	private final ListenerManager machineStateChangedListenerManager;
 
 	private int viewedPage;
 	private int selectedPage;
@@ -40,11 +41,13 @@ public class RAMComposite extends Composite {
 	private final Composite ramPageParent;
 	private Control ramPageChild;
 
-	public RAMComposite(Composite parent, Am2900Machine machine, List<Runnable> machineStateChangedListeners) {
+	private List<Runnable> changeListenersCurrentRamPage;
+
+	public RAMComposite(Composite parent, Am2900Machine machine, ListenerManager machineStateChangedListenerManager) {
 		super(parent, SWT.NONE);
 
 		this.ram = machine.getMachineRam();
-		this.machineStateChangedListeners = machineStateChangedListeners;
+		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
 
 		viewedPage = -1;
 
@@ -72,7 +75,7 @@ public class RAMComposite extends Composite {
 		GridData parentData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		ramPageParent.setLayoutData(parentData);
 		ramPageParent.setLayout(new FillLayout());
-		machineStateChangedListeners.add(this::updateRamPage);
+		machineStateChangedListenerManager.addListener(this::updateRamPage);
 
 		Table getWidthTable = new Table(ramPageParent, SWT.BORDER | SWT.FULL_SELECTION);
 		getWidthTable.setHeaderVisible(true);
@@ -97,6 +100,11 @@ public class RAMComposite extends Composite {
 		if ((ram.isPageInUse(selectedPage) != pageLoaded) || (viewedPage != selectedPage)) {
 			if (ramPageChild != null)
 				ramPageChild.dispose();
+			if (changeListenersCurrentRamPage != null) {
+				changeListenersCurrentRamPage.forEach(machineStateChangedListenerManager::removeListener);
+				changeListenersCurrentRamPage.clear();
+			} else
+				changeListenersCurrentRamPage = new ArrayList<>();
 			viewedPage = selectedPage;
 			pageLoaded = ram.isPageInUse(selectedPage);
 			if (pageLoaded) {
@@ -121,7 +129,8 @@ public class RAMComposite extends Composite {
 						item.setText(texts);
 					};
 					updateTexts.run();
-					machineStateChangedListeners.add(updateTexts);
+					machineStateChangedListenerManager.addListener(updateTexts);
+					changeListenersCurrentRamPage.add(updateTexts);
 				});
 				TableCursor cursor = new TableCursor(ramPageChildT, SWT.NONE);
 				ControlEditor editor = new ControlEditor(cursor);
@@ -185,7 +194,7 @@ public class RAMComposite extends Composite {
 	}
 
 	private void machineChanged() {
-		machineStateChangedListeners.forEach(Runnable::run);
+		machineStateChangedListenerManager.callAllListeners();
 	}
 
 	private void showError(String msg) {

@@ -15,7 +15,7 @@ public class Am2900ME_SWT {
 	public static final String DESCRIPTOR = "SWT Am2900ME (v0.1.1)";
 
 	private final Am2900Machine machine;
-	private final List<Runnable> machineStateChangedListeners;
+	private final ListenerManager machineStateChangedListenerManager;
 
 	private final List<Resource> toDispose;
 	private final Display display;
@@ -27,7 +27,7 @@ public class Am2900ME_SWT {
 
 	public Am2900ME_SWT() {
 		this.machine = new Am2900Machine();
-		this.machineStateChangedListeners = new ArrayList<>();
+		this.machineStateChangedListenerManager = new ListenerManager();
 
 		this.toDispose = new ArrayList<>();
 		this.display = new Display();
@@ -47,7 +47,7 @@ public class Am2900ME_SWT {
 		shellMicroinstructions.setText(DESCRIPTOR + " - Microinstructions");
 		shellMicroinstructions.setImage(iconImage);
 		shellMicroinstructions.setLayout(new FillLayout());
-		new MicroinstructionsComposite(shellMicroinstructions, machine, machineStateChangedListeners);
+		new MicroinstructionsComposite(shellMicroinstructions, machine, machineStateChangedListenerManager);
 		shellMicroinstructions.pack();
 	}
 
@@ -55,7 +55,7 @@ public class Am2900ME_SWT {
 		shellRegistersStatus.setText(DESCRIPTOR + " - Registers & Status");
 		shellRegistersStatus.setImage(iconImage);
 		shellRegistersStatus.setLayout(new FillLayout());
-		new RegistersStatusComposite(shellRegistersStatus, machine, machineStateChangedListeners);
+		new RegistersStatusComposite(shellRegistersStatus, machine, machineStateChangedListenerManager);
 		shellRegistersStatus.pack();
 	}
 
@@ -63,7 +63,7 @@ public class Am2900ME_SWT {
 		shellRAM.setText(DESCRIPTOR + " - Machine RAM");
 		shellRAM.setImage(iconImage);
 		shellRAM.setLayout(new FillLayout());
-		new RAMComposite(shellRAM, machine, machineStateChangedListeners);
+		new RAMComposite(shellRAM, machine, machineStateChangedListenerManager);
 		shellRAM.pack();
 	}
 
@@ -71,7 +71,7 @@ public class Am2900ME_SWT {
 		shellMappingPROM.setText(DESCRIPTOR + " - Mapping PROM");
 		shellMappingPROM.setImage(iconImage);
 		shellMappingPROM.setLayout(new FillLayout());
-		new MappingPROMComposite(shellMappingPROM, machine, machineStateChangedListeners);
+		new MappingPROMComposite(shellMappingPROM, machine, machineStateChangedListenerManager);
 		shellMappingPROM.pack();
 	}
 

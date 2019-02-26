@@ -1,7 +1,5 @@
 package net.haspamelodica.am2900me.swtui;
 
-import java.util.List;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ControlEditor;
 import org.eclipse.swt.custom.TableCursor;
@@ -25,12 +23,13 @@ public class MappingPROMComposite extends Composite {
 	private static final HexIntStringConverter hexIntConv3 = HexIntStringConverter.forNibbles(3);
 
 	private final MappingPROM mprom;
-	private final List<Runnable> machineStateChangedListeners;
+	private final ListenerManager machineStateChangedListenerManager;
 
-	public MappingPROMComposite(Composite parent, Am2900Machine machine, List<Runnable> machineStateChangedListeners) {
+	public MappingPROMComposite(Composite parent, Am2900Machine machine,
+			ListenerManager machineStateChangedListenerManager) {
 		super(parent, SWT.NONE);
 		this.mprom = machine.getmProm();
-		this.machineStateChangedListeners = machineStateChangedListeners;
+		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
 
 		setLayout(new GridLayout());
 
@@ -64,7 +63,7 @@ public class MappingPROMComposite extends Composite {
 			item.setText(2, "");
 			Runnable updateTexts = () -> item.setText(1, hexIntConv3.toString(mprom.get(opcode)));
 			updateTexts.run();
-			machineStateChangedListeners.add(updateTexts);
+			machineStateChangedListenerManager.addListener(updateTexts);
 		});
 		TableCursor cursor = new TableCursor(table, SWT.NONE);
 		ControlEditor editor = new ControlEditor(cursor);
@@ -128,7 +127,7 @@ public class MappingPROMComposite extends Composite {
 	}
 
 	private void machineChanged() {
-		machineStateChangedListeners.forEach(Runnable::run);
+		machineStateChangedListenerManager.callAllListeners();
 	}
 
 	private void showError(String msg) {

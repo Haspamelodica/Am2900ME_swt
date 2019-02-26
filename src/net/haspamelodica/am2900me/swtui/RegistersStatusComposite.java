@@ -25,14 +25,14 @@ import net.maisikoleni.am2900me.util.HexIntStringConverter;
 public class RegistersStatusComposite extends Composite {
 
 	private final Am2900Machine machine;
-	private final List<Runnable> machineStateChangedListeners;
+	private final ListenerManager machineStateChangedListenerManager;
 
 	public RegistersStatusComposite(Composite parent, Am2900Machine machine,
-			List<Runnable> machineStateChangedListeners) {
+			ListenerManager machineStateChangedListenerManager) {
 		super(parent, SWT.NONE);
 
 		this.machine = machine;
-		this.machineStateChangedListeners = machineStateChangedListeners;
+		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
 
 		setLayout(new FillLayout());
 
@@ -139,7 +139,7 @@ public class RegistersStatusComposite extends Composite {
 		});
 		Runnable updateText = () -> item.setText(1, valueStringSupplier.apply(getValue.getAsInt()));
 		updateText.run();
-		machineStateChangedListeners.add(updateText);
+		machineStateChangedListenerManager.addListener(updateText);
 	}
 
 	private void createStatusItem(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals,
@@ -155,7 +155,7 @@ public class RegistersStatusComposite extends Composite {
 		});
 		Runnable updateText = () -> item.setText(1, String.valueOf(machine.getAm2904_01x4().isStatusSet(status)));
 		updateText.run();
-		machineStateChangedListeners.add(updateText);
+		machineStateChangedListenerManager.addListener(updateText);
 	}
 
 	private void createCursor(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals) {
@@ -200,7 +200,7 @@ public class RegistersStatusComposite extends Composite {
 	}
 
 	private void machineChanged() {
-		machineStateChangedListeners.forEach(Runnable::run);
+		machineStateChangedListenerManager.callAllListeners();
 	}
 
 }

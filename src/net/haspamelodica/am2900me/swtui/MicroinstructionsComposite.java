@@ -130,7 +130,7 @@ public class MicroinstructionsComposite extends Composite {
 
 	private final Am2900Machine machine;
 	private final MicroprogramMemory muProgMem;
-	private final List<Runnable> machineStateChangedListeners;
+	private final ListenerManager machineStateChangedListenerManager;
 
 	private final Button execNext;
 	private final Button execNextN;
@@ -143,12 +143,12 @@ public class MicroinstructionsComposite extends Composite {
 	private final Color executingInstrBG;
 
 	public MicroinstructionsComposite(Composite parent, Am2900Machine machine,
-			List<Runnable> machineStateChangedListeners) {
+			ListenerManager machineStateChangedListenerManager) {
 		super(parent, SWT.NONE);
 
 		this.machine = machine;
 		this.muProgMem = machine.getMpm();
-		this.machineStateChangedListeners = machineStateChangedListeners;
+		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
 
 		this.unchangedInstrBG = getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		this.changedInstrUnchangedValueBG = getDisplay().getSystemColor(SWT.COLOR_WHITE);
@@ -188,7 +188,7 @@ public class MicroinstructionsComposite extends Composite {
 			machineChanged();
 		});
 		updateButtonLabels();
-		machineStateChangedListeners.add(this::updateButtonLabels);
+		machineStateChangedListenerManager.addListener(this::updateButtonLabels);
 
 		table = new Table(this, SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION);
 		setupTable();
@@ -490,6 +490,6 @@ public class MicroinstructionsComposite extends Composite {
 	}
 
 	private void machineChanged() {
-		machineStateChangedListeners.forEach(Runnable::run);
+		machineStateChangedListenerManager.callAllListeners();
 	}
 }
