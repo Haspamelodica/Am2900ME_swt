@@ -103,7 +103,6 @@ public class MappingPROMComposite extends Composite {
 					try {
 						int i = Integer.decode(text.getText());
 						mprom.set(opcode, i);
-						item.setText(1, hexIntConv3.toString(i));
 						machineChanged();
 					} catch (IllegalArgumentException x) {
 					}
@@ -113,7 +112,6 @@ public class MappingPROMComposite extends Composite {
 					try {
 						int i = Integer.decode(text.getText());
 						mprom.set(opcode, i);
-						item.setText(opcode, hexIntConv3.toString(i));
 						machineChanged();
 						text.dispose();
 					} catch (IllegalArgumentException x) {
