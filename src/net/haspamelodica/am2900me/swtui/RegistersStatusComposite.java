@@ -53,7 +53,7 @@ public class RegistersStatusComposite extends Composite {
 		Table table = new Table(parent, SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 
-		TableUtil.createColumn(table, "Register Name", 1);
+		TableUtil.createColumn(table, "Register Name", "Register/Counter");
 		TableUtil.createColumn(table, "Value", 4);
 
 		List<Supplier<String>> getVals = new ArrayList<>();
@@ -84,8 +84,8 @@ public class RegistersStatusComposite extends Composite {
 		Table table = new Table(parent, SWT.VIRTUAL | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
 
-		TableUtil.createColumn(table, "Statusbit");
-		TableUtil.createColumn(table, "Value");
+		TableUtil.createColumn(table, "Statusbit", "µOVR", "MOVR");
+		TableUtil.createColumn(table, "Value", "false");
 
 		List<Supplier<String>> getVals = new ArrayList<>();
 		List<Consumer<String>> setVals = new ArrayList<>();

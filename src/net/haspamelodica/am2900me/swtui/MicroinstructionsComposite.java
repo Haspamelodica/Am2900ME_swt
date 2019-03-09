@@ -212,8 +212,12 @@ public class MicroinstructionsComposite extends Composite {
 		table.setHeaderVisible(true);
 		table.setItemCount(muProgMem.size());
 		TableUtil.createColumn(table, "Address", 3);
-		for (int i = 1; i < instructionProperties.size(); i++)
-			TableUtil.createColumn(table, instructionProperties.get(i).name, instructionProperties.get(i).nibbles);
+		for (InstructionProperty p : instructionProperties)
+			if (p != null)
+				if (p.nibbles > 0)
+					TableUtil.createColumn(table, p.name, p.nibbles);
+				else
+					TableUtil.createColumn(table, p.name, p.values);
 		table.addListener(SWT.SetData, e -> {
 			TableItem item = (TableItem) e.item;
 			int address = table.indexOf(item);
