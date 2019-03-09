@@ -322,16 +322,12 @@ public class MicroinstructionsComposite extends Composite {
 	}
 
 	private void executeNextN(int n) {
-		int oldMI = machine.getCurrentMicroInstruction();
 		try {
-			for (int i = 0; i < n; i++) {
+			for (int i = 0; i < n; i++)
 				machine.executeNext();
-			}
 		} catch (Exception ex) {
 			showError("An error occured during execution:\n" + ex);
 		}
-		updateItemColor(oldMI);
-		updateItemColor(machine.getCurrentMicroInstruction());
 		machineChanged();
 	}
 
