@@ -282,7 +282,6 @@ public class MicroinstructionsComposite extends Composite {
 		};
 		cursor.addListener(SWT.DefaultSelection, editListener);
 		cursor.addListener(SWT.MouseDown, editListener);
-
 	}
 
 	private void updateItemColor(int address) {
@@ -329,6 +328,7 @@ public class MicroinstructionsComposite extends Composite {
 			showError("An error occured during execution:\n" + ex);
 		}
 		machineChanged();
+		table.showItem(table.getItem(machine.getCurrentMicroInstruction()));
 	}
 
 	private void updateButtonLabels() {
