@@ -19,7 +19,7 @@ public class ListenerManager {
 	}
 
 	public void callAllListeners() {
-		for (Runnable l : listeners)
+		for (Runnable l : new ArrayList<>(listeners))//avoid ConcurrentModificationException
 			l.run();
 	}
 }
