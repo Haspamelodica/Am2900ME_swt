@@ -179,6 +179,7 @@ public class RAMComposite extends Composite {
 				};
 				cursor.addListener(SWT.DefaultSelection, editListener);
 				cursor.addListener(SWT.MouseDown, editListener);
+				machineStateChangedListenerManager.addListener(cursor::redraw);
 			} else {
 				Composite ramPageChildC = new Composite(ramPageParent, SWT.NONE);
 				ramPageChild = ramPageChildC;

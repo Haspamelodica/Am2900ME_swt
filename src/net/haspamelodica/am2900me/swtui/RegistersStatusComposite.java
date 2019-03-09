@@ -199,6 +199,7 @@ public class RegistersStatusComposite extends Composite {
 		};
 		cursor.addListener(SWT.DefaultSelection, editListener);
 		cursor.addListener(SWT.MouseDown, editListener);
+		machineStateChangedListenerManager.addListener(cursor::redraw);
 	}
 
 	private void machineChanged() {
