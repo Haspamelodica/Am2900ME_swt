@@ -12,6 +12,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ControlEditor;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.TableCursor;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Listener;
@@ -25,14 +26,21 @@ import net.maisikoleni.am2900me.util.HexIntStringConverter;
 public class RegistersStatusComposite extends Composite {
 
 	private final Am2900Machine machine;
-	private final ListenerManager machineStateChangedListenerManager;
+	private final ListenerManager internalMachineStateChangedListenerManager;
+	private final ListenerManager acceptChangesListenerManager;
+
+	private final Color colorChangedCell;
 
 	public RegistersStatusComposite(Composite parent, Am2900Machine machine,
-			ListenerManager machineStateChangedListenerManager) {
+			ListenerManager machineStateChangedListenerManager, ListenerManager acceptChangesListenerManager) {
 		super(parent, SWT.NONE);
 
 		this.machine = machine;
-		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
+		this.internalMachineStateChangedListenerManager = new ListenerManager();
+		machineStateChangedListenerManager.addListener(internalMachineStateChangedListenerManager::callAllListeners);
+		this.acceptChangesListenerManager = acceptChangesListenerManager;
+
+		colorChangedCell = getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
 
 		setLayout(new FillLayout());
 
@@ -45,6 +53,9 @@ public class RegistersStatusComposite extends Composite {
 		setupStatusTable(sashFormV);
 
 		setupGeneralPurposeMachineRegisterTable(sashFormH);
+
+		//call after tables have been set up. Otherwise oldVals aren't updated when cell update occurs.
+		acceptChangesListenerManager.addListener(internalMachineStateChangedListenerManager::callAllListeners);
 
 		pack();
 	}
@@ -123,6 +134,7 @@ public class RegistersStatusComposite extends Composite {
 
 	private void createIntItem(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals,
 			String label, IntSupplier getValue, IntConsumer setValue, int hexDigits) {
+		int[] oldVal = new int[1];
 		TableItem item = new TableItem(table, SWT.NONE);
 		item.setText(0, label);
 		IntFunction<String> valueStringSupplier;
@@ -137,14 +149,23 @@ public class RegistersStatusComposite extends Composite {
 			item.setText(1, valueStringSupplier.apply(i));
 			machineChanged();
 		});
-		Runnable updateText = () -> item.setText(1, valueStringSupplier.apply(getValue.getAsInt()));
+		Runnable updateText = () -> {
+			int newVal = getValue.getAsInt();
+			item.setText(1, valueStringSupplier.apply(newVal));
+			if (oldVal[0] != newVal)
+				item.setBackground(1, colorChangedCell);
+			else
+				item.setBackground(1, null);
+		};
 		updateText.run();
-		machineStateChangedListenerManager.addListener(updateText);
-		item.addDisposeListener(e -> machineStateChangedListenerManager.removeListener(updateText));
+		internalMachineStateChangedListenerManager.addListener(updateText);
+		item.addDisposeListener(e -> internalMachineStateChangedListenerManager.removeListener(updateText));
+		acceptChangesListenerManager.addListener(() -> oldVal[0] = getValue.getAsInt());
 	}
 
 	private void createStatusItem(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals,
 			String status) {
+		boolean[] oldVal = new boolean[1];
 		TableItem item = new TableItem(table, SWT.NONE);
 		item.setText(0, status);
 		getVals.add(table.indexOf(item), () -> String.valueOf(machine.getAm2904_01x4().isStatusSet(status)));
@@ -154,10 +175,18 @@ public class RegistersStatusComposite extends Composite {
 			item.setText(1, String.valueOf(b));
 			machineChanged();
 		});
-		Runnable updateText = () -> item.setText(1, String.valueOf(machine.getAm2904_01x4().isStatusSet(status)));
+		Runnable updateText = () -> {
+			boolean newVal = machine.getAm2904_01x4().isStatusSet(status);
+			item.setText(1, String.valueOf(newVal));
+			if (oldVal[0] != newVal)
+				item.setBackground(1, colorChangedCell);
+			else
+				item.setBackground(1, null);
+		};
 		updateText.run();
-		machineStateChangedListenerManager.addListener(updateText);
-		item.addDisposeListener(e -> machineStateChangedListenerManager.removeListener(updateText));
+		internalMachineStateChangedListenerManager.addListener(updateText);
+		item.addDisposeListener(e -> internalMachineStateChangedListenerManager.removeListener(updateText));
+		acceptChangesListenerManager.addListener(() -> oldVal[0] = machine.getAm2904_01x4().isStatusSet(status));
 	}
 
 	private void createCursor(Table table, List<Supplier<String>> getVals, List<Consumer<String>> setVals) {
@@ -200,11 +229,11 @@ public class RegistersStatusComposite extends Composite {
 		cursor.addListener(SWT.DefaultSelection, editListener);
 		cursor.addListener(SWT.MouseDown, editListener);
 		Runnable cursorRedrawListener = cursor::redraw;
-		machineStateChangedListenerManager.addListener(cursorRedrawListener);
-		cursor.addDisposeListener(e -> machineStateChangedListenerManager.removeListener(cursorRedrawListener));
+		internalMachineStateChangedListenerManager.addListener(cursorRedrawListener);
+		cursor.addDisposeListener(e -> internalMachineStateChangedListenerManager.removeListener(cursorRedrawListener));
 	}
 
 	private void machineChanged() {
-		machineStateChangedListenerManager.callAllListeners();
+		internalMachineStateChangedListenerManager.callAllListeners();
 	}
 }

@@ -10,6 +10,7 @@ import java.util.Scanner;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ControlEditor;
 import org.eclipse.swt.custom.TableCursor;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -34,26 +35,40 @@ public class RAMComposite extends Composite {
 	private static final HexIntStringConverter hexIntConv4 = HexIntStringConverter.forNibbles(4);
 
 	private final MachineRAM ram;
-	private final ListenerManager machineStateChangedListenerManager;
+	private final ListenerManager internalMachineStateChangedListenerManager;
 
+	private final MachineRAM ramLastChangeAccept;
 	private int viewedPage;
 	private int selectedPage;
 	private boolean pageLoaded;
 
+	private final Color colorChangedCell;
 	private final Composite ramPageParent;
 	private Control ramPageChild;
 
 	private List<Runnable> changeListenersCurrentRamPage;
 
-	public RAMComposite(Composite parent, Am2900Machine machine, ListenerManager machineStateChangedListenerManager) {
+	public RAMComposite(Composite parent, Am2900Machine machine, ListenerManager machineStateChangedListenerManager,
+			ListenerManager acceptChangesListenerManager) {
 		super(parent, SWT.NONE);
 
 		this.ram = machine.getMachineRam();
-		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
+		internalMachineStateChangedListenerManager = new ListenerManager();
+		machineStateChangedListenerManager.addListener(internalMachineStateChangedListenerManager::callAllListeners);
 
+		ramLastChangeAccept = new MachineRAM();
 		viewedPage = -1;
 
+		acceptChangesListenerManager.addListener(() -> {
+			int maxAddr = ram.pageCount() * ram.cellCount();
+			for (int addr = 0; addr < maxAddr; addr++)
+				ramLastChangeAccept.set(addr, ram.get(addr));
+			internalMachineStateChangedListenerManager.callAllListeners();
+		});
+
 		setLayout(new GridLayout());
+
+		colorChangedCell = getDisplay().getSystemColor(SWT.COLOR_MAGENTA);
 
 		Composite toolbar = new Composite(this, SWT.NONE);
 		toolbar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -105,7 +120,7 @@ public class RAMComposite extends Composite {
 			if (ramPageChild != null)
 				ramPageChild.dispose();
 			if (changeListenersCurrentRamPage != null) {
-				changeListenersCurrentRamPage.forEach(machineStateChangedListenerManager::removeListener);
+				changeListenersCurrentRamPage.forEach(internalMachineStateChangedListenerManager::removeListener);
 				changeListenersCurrentRamPage.clear();
 			} else
 				changeListenersCurrentRamPage = new ArrayList<>();
@@ -127,15 +142,22 @@ public class RAMComposite extends Composite {
 
 					String[] texts = new String[17];
 					texts[0] = hexIntConv4.toString(addressOffset);
-					Runnable updateTexts = () -> {
-						for (int i = 0; i < 16; i++)
-							texts[i + 1] = hexIntConv4.toString((int) ram.get(addressOffset + i));
+					Runnable updateTextsAndColors = () -> {
+						for (int i = 0; i < 16; i++) {
+							int address = addressOffset + i;
+							texts[i + 1] = hexIntConv4.toString((int) ram.get(address));
+							if (ram.get(address) != ramLastChangeAccept.get(address))
+								item.setBackground(i + 1, colorChangedCell);
+							else
+								item.setBackground(i + 1, null);
+						}
 						item.setText(texts);
 					};
-					updateTexts.run();
-					machineStateChangedListenerManager.addListener(updateTexts);
-					item.addDisposeListener(v -> machineStateChangedListenerManager.removeListener(updateTexts));
-					changeListenersCurrentRamPage.add(updateTexts);
+					updateTextsAndColors.run();
+					internalMachineStateChangedListenerManager.addListener(updateTextsAndColors);
+					item.addDisposeListener(
+							v -> internalMachineStateChangedListenerManager.removeListener(updateTextsAndColors));
+					changeListenersCurrentRamPage.add(updateTextsAndColors);
 				});
 				TableCursor cursor = new TableCursor(ramPageChildT, SWT.NONE);
 				ControlEditor editor = new ControlEditor(cursor);
@@ -180,8 +202,9 @@ public class RAMComposite extends Composite {
 				cursor.addListener(SWT.DefaultSelection, editListener);
 				cursor.addListener(SWT.MouseDown, editListener);
 				Runnable cursorRedrawListener = cursor::redraw;
-				machineStateChangedListenerManager.addListener(cursorRedrawListener);
-				cursor.addDisposeListener(e -> machineStateChangedListenerManager.removeListener(cursorRedrawListener));
+				internalMachineStateChangedListenerManager.addListener(cursorRedrawListener);
+				cursor.addDisposeListener(
+						e -> internalMachineStateChangedListenerManager.removeListener(cursorRedrawListener));
 			} else {
 				Composite ramPageChildC = new Composite(ramPageParent, SWT.NONE);
 				ramPageChild = ramPageChildC;
@@ -202,7 +225,7 @@ public class RAMComposite extends Composite {
 	}
 
 	private void machineChanged() {
-		machineStateChangedListenerManager.callAllListeners();
+		internalMachineStateChangedListenerManager.callAllListeners();
 	}
 
 	private void saveCSVFile() {

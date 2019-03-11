@@ -16,6 +16,7 @@ public class Am2900ME_SWT {
 
 	private final Am2900Machine machine;
 	private final ListenerManager machineStateChangedListenerManager;
+	private final ListenerManager acceptChangesListenerManager;
 
 	private final List<Resource> toDispose;
 	private final Display display;
@@ -28,6 +29,7 @@ public class Am2900ME_SWT {
 	public Am2900ME_SWT() {
 		this.machine = new Am2900Machine();
 		this.machineStateChangedListenerManager = new ListenerManager();
+		this.acceptChangesListenerManager = new ListenerManager();
 
 		this.toDispose = new ArrayList<>();
 		this.display = new Display();
@@ -47,7 +49,8 @@ public class Am2900ME_SWT {
 		shellMicroinstructions.setText(DESCRIPTOR + " - Microinstructions");
 		shellMicroinstructions.setImage(iconImage);
 		shellMicroinstructions.setLayout(new FillLayout());
-		new MicroinstructionsComposite(shellMicroinstructions, machine, machineStateChangedListenerManager);
+		new MicroinstructionsComposite(shellMicroinstructions, machine, machineStateChangedListenerManager,
+				acceptChangesListenerManager);
 		shellMicroinstructions.pack();
 	}
 
@@ -55,7 +58,8 @@ public class Am2900ME_SWT {
 		shellRegistersStatus.setText(DESCRIPTOR + " - Registers & Status");
 		shellRegistersStatus.setImage(iconImage);
 		shellRegistersStatus.setLayout(new FillLayout());
-		new RegistersStatusComposite(shellRegistersStatus, machine, machineStateChangedListenerManager);
+		new RegistersStatusComposite(shellRegistersStatus, machine, machineStateChangedListenerManager,
+				acceptChangesListenerManager);
 		shellRegistersStatus.pack();
 	}
 
@@ -63,7 +67,7 @@ public class Am2900ME_SWT {
 		shellRAM.setText(DESCRIPTOR + " - Machine RAM");
 		shellRAM.setImage(iconImage);
 		shellRAM.setLayout(new FillLayout());
-		new RAMComposite(shellRAM, machine, machineStateChangedListenerManager);
+		new RAMComposite(shellRAM, machine, machineStateChangedListenerManager, acceptChangesListenerManager);
 		shellRAM.pack();
 	}
 

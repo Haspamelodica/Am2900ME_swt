@@ -133,6 +133,7 @@ public class MicroinstructionsComposite extends Composite {
 	private final Am2900Machine machine;
 	private final MicroprogramMemory muProgMem;
 	private final ListenerManager machineStateChangedListenerManager;
+	private final ListenerManager acceptChangesListenerManager;
 
 	private final Button execNext;
 	private final Button execNextN;
@@ -145,12 +146,13 @@ public class MicroinstructionsComposite extends Composite {
 	private final Color executingInstrBG;
 
 	public MicroinstructionsComposite(Composite parent, Am2900Machine machine,
-			ListenerManager machineStateChangedListenerManager) {
+			ListenerManager machineStateChangedListenerManager, ListenerManager acceptChangesListenerManager) {
 		super(parent, SWT.NONE);
 
 		this.machine = machine;
 		this.muProgMem = machine.getMpm();
 		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
+		this.acceptChangesListenerManager = acceptChangesListenerManager;
 
 		this.unchangedInstrBG = getDisplay().getSystemColor(SWT.COLOR_GRAY);
 		this.changedInstrUnchangedValueBG = getDisplay().getSystemColor(SWT.COLOR_WHITE);
@@ -335,6 +337,7 @@ public class MicroinstructionsComposite extends Composite {
 			showError("An error occured during execution:\n" + ex);
 		}
 		machineChanged();
+		acceptChangesListenerManager.callAllListeners();
 		table.showItem(table.getItem(machine.getCurrentMicroInstruction()));
 	}
 
