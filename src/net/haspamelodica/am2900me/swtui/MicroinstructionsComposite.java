@@ -330,6 +330,7 @@ public class MicroinstructionsComposite extends Composite {
 	}
 
 	private void executeNextN(int n) {
+		acceptChangesListenerManager.callAllListeners();
 		try {
 			for (int i = 0; i < n; i++)
 				machine.executeNext();
@@ -337,7 +338,6 @@ public class MicroinstructionsComposite extends Composite {
 			showError("An error occured during execution:\n" + ex);
 		}
 		machineChanged();
-		acceptChangesListenerManager.callAllListeners();
 		table.showItem(table.getItem(machine.getCurrentMicroInstruction()));
 	}
 
