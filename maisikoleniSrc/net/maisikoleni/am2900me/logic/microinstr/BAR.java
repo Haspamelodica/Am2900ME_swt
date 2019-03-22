@@ -2,7 +2,7 @@ package net.maisikoleni.am2900me.logic.microinstr;
 
 import net.maisikoleni.am2900me.util.NBitsUInt;
 
-public class BAR extends NBitsUInt implements MuIField {
+public class BAR extends NBitsUInt implements µIField {
 	static final BAR DEFAULT = new BAR(0x000);
 
 	public BAR(int uint_12bit) {

@@ -1,6 +1,6 @@
 package net.maisikoleni.am2900me.logic.microinstr;
 
-public enum ASEL implements MuIField {
+public enum ASEL implements µIField {
 	IR,
 	MR;
 

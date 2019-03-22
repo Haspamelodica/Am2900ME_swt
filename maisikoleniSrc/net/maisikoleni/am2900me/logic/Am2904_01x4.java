@@ -7,7 +7,7 @@ import net.maisikoleni.am2900me.logic.microinstr.Am2904_Carry;
 import net.maisikoleni.am2900me.logic.microinstr.Am2904_Inst;
 import net.maisikoleni.am2900me.logic.microinstr.Am2904_Shift;
 import net.maisikoleni.am2900me.logic.microinstr._CE_M;
-import net.maisikoleni.am2900me.logic.microinstr._CE_mu;
+import net.maisikoleni.am2900me.logic.microinstr._CE_µ;
 
 /**
  * The combination of {@link Am2904} and {@link Am2901x4}; everything wired up
@@ -54,7 +54,7 @@ public class Am2904_01x4 {
 		am2904.input.mi_inst = input.mi_inst;
 		am2904.input.mi_shift = input.mi_shift;
 		am2904.input._CEM = input._CEM;
-		am2904.input._CEmu = input._CEmu;
+		am2904.input._CEµ = input._CEµ;
 		am2904.input._SE = input.mi_dest.doesShift() ? 0 : 1;
 		am2904.input.I10 = input.mi_dest.getI7();
 		am2904.input._OEY = input._OEY;
@@ -98,13 +98,13 @@ public class Am2904_01x4 {
 	public final boolean isStatusSet(String id) {
 		switch (id) {
 		case "µC":
-			return am2904.getmuC() == 1;
+			return am2904.getµC() == 1;
 		case "µN":
-			return am2904.getmuN() == 1;
+			return am2904.getµN() == 1;
 		case "µZ":
-			return am2904.getmuZ() == 1;
+			return am2904.getµZ() == 1;
 		case "µOVR":
-			return am2904.getmuOVR() == 1;
+			return am2904.getµOVR() == 1;
 		case "MC":
 			return am2904.getMC() == 1;
 		case "MN":
@@ -121,16 +121,16 @@ public class Am2904_01x4 {
 	public final void setStatus(String id, boolean value) {
 		switch (id) {
 		case "µC":
-			am2904.setmuC(value ? 1 : 0);
+			am2904.setµC(value ? 1 : 0);
 			break;
 		case "µN":
-			am2904.setmuN(value ? 1 : 0);
+			am2904.setµN(value ? 1 : 0);
 			break;
 		case "µZ":
-			am2904.setmuZ(value ? 1 : 0);
+			am2904.setµZ(value ? 1 : 0);
 			break;
 		case "µOVR":
-			am2904.setmuOVR(value ? 1 : 0);
+			am2904.setµOVR(value ? 1 : 0);
 			break;
 		case "MC":
 			am2904.setMC(value ? 1 : 0);
@@ -179,7 +179,7 @@ class Am2904_01x4input {
 	Am2904_Carry mi_carry;
 	Am2904_Shift mi_shift;
 	_CE_M _CEM;
-	_CE_mu _CEmu;
+	_CE_µ _CEµ;
 	int _OEY;
 	int _OECT;
 	int D;

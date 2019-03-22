@@ -72,7 +72,7 @@ public class RegistersStatusComposite extends Composite {
 		createIntItem(table, getVals, setVals, "PC", machine.getPc()::getPc, machine.getPc()::setPc, 4);
 		createIntItem(table, getVals, setVals, "IR", machine.getIr()::getInstruction, machine.getIr()::setInstruction,
 				4);
-		createIntItem(table, getVals, setVals, "µPC", machine.getAm2910()::getmuPC, machine.getAm2910()::setmuPC, 3);
+		createIntItem(table, getVals, setVals, "µPC", machine.getAm2910()::getµPC, machine.getAm2910()::setµPC, 3);
 		createIntItem(table, getVals, setVals, "Register/Counter", machine.getAm2910()::getRegisterCounter,
 				machine.getAm2910()::setRegisterCounter, 3);
 		createIntItem(table, getVals, setVals, "Stack Pointer", machine.getAm2910()::getStackPointer,

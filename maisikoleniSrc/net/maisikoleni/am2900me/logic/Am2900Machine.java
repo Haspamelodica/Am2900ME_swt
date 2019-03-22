@@ -77,7 +77,7 @@ public class Am2900Machine {
 			throw new IllegalStateException("no data bus signal to use in K-MUX");
 		// Am2904 and Am2901
 		am2904_01x4.input._CEM = mi.ce_m;
-		am2904_01x4.input._CEmu = mi.ce_mu;
+		am2904_01x4.input._CEµ = mi.ce_µ;
 		am2904_01x4.input.D = d;
 		am2904_01x4.input.regA_addr = ra_addr;
 		am2904_01x4.input.regB_addr = rb_addr;
@@ -181,6 +181,5 @@ public class Am2900Machine {
 		machineRam.reset();
 		am2904_01x4.reset();
 		am2910.reset();
-		currentMI = -1;
 	}
 }

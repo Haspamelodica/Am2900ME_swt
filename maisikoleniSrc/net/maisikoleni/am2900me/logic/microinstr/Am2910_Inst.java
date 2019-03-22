@@ -1,6 +1,6 @@
 package net.maisikoleni.am2900me.logic.microinstr;
 
-public enum Am2910_Inst implements MuIField {
+public enum Am2910_Inst implements µIField {
 	JZ,
 	CJS,
 	JMAP,

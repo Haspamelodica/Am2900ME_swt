@@ -14,19 +14,19 @@ import java.util.List;
 public class MicroInstruction {
 	public static final List<String> FIELD_NAMES = Collections.unmodifiableList(
 			Arrays.asList("mwe", "ir_ld", "bz_ea", "bz_inc", "bz_ed", "bz_ld", "bar", "am2910_Inst", "ccen",
-					"am2904_Inst", "ce_m", "ce_mu", "am2904_Shift", "am2904_Carry", "dbus", "abus", "bsel", "rb_addr",
+					"am2904_Inst", "ce_m", "ce_µ", "am2904_Shift", "am2904_Carry", "dbus", "abus", "bsel", "rb_addr",
 					"asel", "ra_addr", "am2901_Dest", "am2901_Func", "am2901_Src", "k", "kmux", "interrupt", "ie"));
 
 	public static final MicroInstruction DEFAULT = new MicroInstruction(_MWE.R, _IR_LD.H, _BZ_EA.H, _BZ_INC.H, _BZ_ED.H,
-			_BZ_LD.H, BAR.DEFAULT, Am2910_Inst.CONT, _CCEN.PS, Am2904_Inst.Load_Load_I_Z, _CE_M.H, _CE_mu.H,
+			_BZ_LD.H, BAR.DEFAULT, Am2910_Inst.CONT, _CCEN.PS, Am2904_Inst.Load_Load_I_Z, _CE_M.H, _CE_µ.H,
 			Am2904_Shift.DEFAULT, Am2904_Carry.CI0, _DBUS.H, _ABUS.H, BSEL.IR, RB_ADDR.DEFAULT, ASEL.IR,
 			RA_ADDR.DEFAULT, Am2901_Dest.NOP, Am2901_Func.ADD, Am2901_Src.AB, Konst.DEFAULT, KMUX.K, Interrupt.DEFAULT,
 			IE.DIS);
 
-	public static final List<MuIField> FIELD_DEFAULTS = Collections
+	public static final List<µIField> FIELD_DEFAULTS = Collections
 			.unmodifiableList(Arrays.asList(DEFAULT.mwe, DEFAULT.ir_ld, DEFAULT.bz_ea, DEFAULT.bz_inc, DEFAULT.bz_ed,
 					DEFAULT.bz_ld, DEFAULT.bar, DEFAULT.am2910_Inst, DEFAULT.ccen, DEFAULT.am2904_Inst, DEFAULT.ce_m,
-					DEFAULT.ce_mu, DEFAULT.am2904_Shift, DEFAULT.am2904_Carry, DEFAULT.dbus, DEFAULT.abus, DEFAULT.bsel,
+					DEFAULT.ce_µ, DEFAULT.am2904_Shift, DEFAULT.am2904_Carry, DEFAULT.dbus, DEFAULT.abus, DEFAULT.bsel,
 					DEFAULT.rb_addr, DEFAULT.asel, DEFAULT.ra_addr, DEFAULT.am2901_Dest, DEFAULT.am2901_Func,
 					DEFAULT.am2901_Src, DEFAULT.k, DEFAULT.kmux, DEFAULT.interrupt, DEFAULT.ie));
 
@@ -41,7 +41,7 @@ public class MicroInstruction {
 	public final _CCEN ccen;
 	public final Am2904_Inst am2904_Inst;
 	public final _CE_M ce_m;
-	public final _CE_mu ce_mu;
+	public final _CE_µ ce_µ;
 	public final Am2904_Shift am2904_Shift;
 	public final Am2904_Carry am2904_Carry;
 	public final _DBUS dbus;
@@ -59,7 +59,7 @@ public class MicroInstruction {
 	public final IE ie;
 
 	private MicroInstruction(_MWE mwe, _IR_LD ir_ld, _BZ_EA bz_ea, _BZ_INC bz_inc, _BZ_ED bz_ed, _BZ_LD bz_ld, BAR bar,
-			Am2910_Inst am2910_Inst, _CCEN ccen, Am2904_Inst am2904_Inst, _CE_M ce_m, _CE_mu ce_mu,
+			Am2910_Inst am2910_Inst, _CCEN ccen, Am2904_Inst am2904_Inst, _CE_M ce_m, _CE_µ ce_µ,
 			Am2904_Shift am2904_Shift, Am2904_Carry am2904_Carry, _DBUS dbus, _ABUS abus, BSEL bsel, RB_ADDR rb_addr,
 			ASEL asel, RA_ADDR ra_addr, Am2901_Dest am2901_Dest, Am2901_Func am2901_Func, Am2901_Src am2901_Src,
 			Konst k, KMUX kmux, Interrupt interrupt, IE ie) {
@@ -74,7 +74,7 @@ public class MicroInstruction {
 		this.ccen = ccen;
 		this.am2904_Inst = am2904_Inst;
 		this.ce_m = ce_m;
-		this.ce_mu = ce_mu;
+		this.ce_µ = ce_µ;
 		this.am2904_Shift = am2904_Shift;
 		this.am2904_Carry = am2904_Carry;
 		this.dbus = dbus;
@@ -107,7 +107,7 @@ public class MicroInstruction {
 		sb.append("\t" + ccen + ",\n");
 		sb.append("\t" + am2904_Inst + ",\n");
 		sb.append("\t" + ce_m + ",\n");
-		sb.append("\t" + ce_mu + ",\n");
+		sb.append("\t" + ce_µ + ",\n");
 		sb.append("\t" + am2904_Shift + ",\n");
 		sb.append("\t" + am2904_Carry + ",\n");
 		sb.append("\t" + dbus + ",\n");
@@ -175,7 +175,7 @@ public class MicroInstruction {
 			return false;
 		if (ce_m != other.ce_m)
 			return false;
-		if (ce_mu != other.ce_mu)
+		if (ce_µ != other.ce_µ)
 			return false;
 		if (dbus != other.dbus)
 			return false;
@@ -254,8 +254,8 @@ public class MicroInstruction {
 		return ce_m;
 	}
 
-	public final _CE_mu getCe_mu() {
-		return ce_mu;
+	public final _CE_µ getCe_µ() {
+		return ce_µ;
 	}
 
 	public final Am2904_Shift getAm2904_Shift() {
@@ -320,163 +320,163 @@ public class MicroInstruction {
 
 	public final MicroInstruction withMwe(_MWE mwe) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withIr_ld(_IR_LD ir_ld) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withBz_ea(_BZ_EA bz_ea) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withBz_inc(_BZ_INC bz_inc) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withBz_ed(_BZ_ED bz_ed) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withBz_ld(_BZ_LD bz_ld) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withBar(BAR bar) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2910_Inst(Am2910_Inst am2910_Inst) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withCcen(_CCEN ccen) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2904_Inst(Am2904_Inst am2904_Inst) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withCe_m(_CE_M ce_m) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
-	public final MicroInstruction withCe_mu(_CE_mu ce_mu) {
+	public final MicroInstruction withCe_µ(_CE_µ ce_µ) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2904_Shift(Am2904_Shift am2904_Shift) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2904_Carry(Am2904_Carry am2904_Carry) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withDbus(_DBUS dbus) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAbus(_ABUS abus) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withBsel(BSEL bsel) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withRb_addr(RB_ADDR rb_addr) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAsel(ASEL asel) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withRa_addr(RA_ADDR ra_addr) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2901_Dest(Am2901_Dest am2901_Dest) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2901_Func(Am2901_Func am2901_Func) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withAm2901_Src(Am2901_Src am2901_Src) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withK(Konst k) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withKmux(KMUX kmux) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withInterrupt(Interrupt interrupt) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 
 	public final MicroInstruction withIe(IE ie) {
 		return new MicroInstruction(mwe, ir_ld, bz_ea, bz_inc, bz_ed, bz_ld, bar, am2910_Inst, ccen, am2904_Inst, ce_m,
-				ce_mu, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
+				ce_µ, am2904_Shift, am2904_Carry, dbus, abus, bsel, rb_addr, asel, ra_addr, am2901_Dest, am2901_Func,
 				am2901_Src, k, kmux, interrupt, ie);
 	}
 

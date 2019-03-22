@@ -1,6 +1,6 @@
 package net.maisikoleni.am2900me.logic.microinstr;
 
-public enum _BZ_EA implements MuIField {
+public enum _BZ_EA implements µIField {
 	E,
 	H;
 

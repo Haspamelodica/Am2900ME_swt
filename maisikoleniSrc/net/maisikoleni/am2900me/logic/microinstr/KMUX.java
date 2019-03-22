@@ -1,6 +1,6 @@
 package net.maisikoleni.am2900me.logic.microinstr;
 
-public enum KMUX implements MuIField {
+public enum KMUX implements µIField {
 	K,
 	D;
 

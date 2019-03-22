@@ -4,7 +4,7 @@ import net.maisikoleni.am2900me.logic.microinstr.Am2904_Carry;
 import net.maisikoleni.am2900me.logic.microinstr.Am2904_Inst;
 import net.maisikoleni.am2900me.logic.microinstr.Am2904_Shift;
 import net.maisikoleni.am2900me.logic.microinstr._CE_M;
-import net.maisikoleni.am2900me.logic.microinstr._CE_mu;
+import net.maisikoleni.am2900me.logic.microinstr._CE_µ;
 import net.maisikoleni.am2900me.util.BitUtil;
 
 /**
@@ -18,10 +18,10 @@ import net.maisikoleni.am2900me.util.BitUtil;
  *
  */
 public class Am2904 {
-	private int muC;
-	private int muN;
-	private int muZ;
-	private int muOVR;
+	private int µC;
+	private int µN;
+	private int µZ;
+	private int µOVR;
 	private int MC;
 	private int MN;
 	private int MZ;
@@ -69,7 +69,7 @@ public class Am2904 {
 			Am2904_Inst inst = input.mi_inst;
 			int instBlock = inst.getBlock();
 			if (instBlock <= 1)
-				return inst.isLoadCarryInvert() ? 1 - muC : muC;
+				return inst.isLoadCarryInvert() ? 1 - µC : µC;
 			return inst.isLoadCarryInvert() ? 1 - MC : MC;
 		default:
 			throw new IllegalArgumentException("unknown am2904 carry config: " + carry);
@@ -80,12 +80,12 @@ public class Am2904 {
 		if (input._OEY == 1)
 			return BitUtil.TRI_STATE_OFF;
 		Am2904_Inst inst = input.mi_inst;
-		if (inst == Am2904_Inst.LoadM_LoadY_mu_NxorOVRorZ)
+		if (inst == Am2904_Inst.LoadM_LoadY_µ_NxorOVRorZ)
 			return BitUtil.TRI_STATE_OFF;
 		switch (inst.getBlock()) {
 		case 0:
 		case 1:
-			return BitUtil.toBitVector(muZ, muC, muN, muOVR);
+			return BitUtil.toBitVector(µZ, µC, µN, µOVR);
 		case 2:
 			return BitUtil.toBitVector(MZ, MC, MN, MOVR);
 		case 3:
@@ -101,70 +101,70 @@ public class Am2904 {
 			return BitUtil.TRI_STATE_OFF;
 		Am2904_Inst inst = input.mi_inst;
 		switch (inst) {
-		case LoadM_LoadY_mu_NxorOVRorZ:
-			return (muN ^ muOVR) | muZ;
-		case Set_Set_mu_NxnorOVRornotZ:
-			return 1 - (muN ^ muOVR) & muZ;
-		case Swap_Swap_mu_NxorOVR:
-			return muN ^ muOVR;
-		case Reset_Reset_mu_NxnorOVR:
-			return 1 - (muN ^ muOVR);
-		case Load_LoadForShiftThroughOvr_mu_Z:
-			return muZ;
-		case Load_Invert_mu_notZ:
-			return 1 - muZ;
-		case LoadOvrRetain_Load_mu_OVR:
-			return muOVR;
-		case LoadOvrRetain_Load_mu_notOVR:
-			return 1 - muOVR;
-		case ResetZ_LoadCarryInvert_mu_CorZ:
-			return muC | muZ;
-		case SetZ_LoadCarryInvert_mu_notCandnotZ:
-			return 1 - muC & 1 - muZ;
-		case ResetC_Load_mu_C:
-			return muC;
-		case SetC_Load_mu_notC:
-			return 1 - muC;
-		case ResetN_Load_mu_notCorZ:
-			return 1 - muC | muZ;
-		case SetN_Load_mu_CandnotZ:
-			return muC & 1 - muZ;
+		case LoadM_LoadY_µ_NxorOVRorZ:
+			return (µN ^ µOVR) | µZ;
+		case Set_Set_µ_NxnorOVRornotZ:
+			return 1 - (µN ^ µOVR) & µZ;
+		case Swap_Swap_µ_NxorOVR:
+			return µN ^ µOVR;
+		case Reset_Reset_µ_NxnorOVR:
+			return 1 - (µN ^ µOVR);
+		case Load_LoadForShiftThroughOvr_µ_Z:
+			return µZ;
+		case Load_Invert_µ_notZ:
+			return 1 - µZ;
+		case LoadOvrRetain_Load_µ_OVR:
+			return µOVR;
+		case LoadOvrRetain_Load_µ_notOVR:
+			return 1 - µOVR;
+		case ResetZ_LoadCarryInvert_µ_CorZ:
+			return µC | µZ;
+		case SetZ_LoadCarryInvert_µ_notCandnotZ:
+			return 1 - µC & 1 - µZ;
+		case ResetC_Load_µ_C:
+			return µC;
+		case SetC_Load_µ_notC:
+			return 1 - µC;
+		case ResetN_Load_µ_notCorZ:
+			return 1 - µC | µZ;
+		case SetN_Load_µ_CandnotZ:
+			return µC & 1 - µZ;
 		case ResetOvr_Load_IM_NxorN:
 			return input.IN ^ MN;
 		case SetOvr_Load_IM_NxnorN:
 			return 1 - (input.IN ^ MN);
-		case Load_Load_mu_NxorOVRorZ:
-			return (muN ^ muOVR) | muZ;
-		case Load_Load_mu_NxnorOVRornotZ:
-			return 1 - (muN ^ muOVR) & muZ;
-		case Load_Load_mu_NxorOVR:
-			return muN ^ muOVR;
-		case Load_Load_mu_NxnorOVR:
-			return 1 - (muN ^ muOVR);
-		case Load_Load_mu_Z:
-			return muZ;
-		case Load_Load_mu_notZ:
-			return 1 - muZ;
-		case Load_Load_mu_OVR:
-			return muOVR;
-		case Load_Load_mu_notOVR:
-			return 1 - muOVR;
-		case LoadCarryInvert_LoadCarryInvert_mu_CorZ:
-			return muC | muZ;
-		case LoadCarryInvert_LoadCarryInvert_mu_notCandnotZ:
-			return 1 - muC & 1 - muZ;
-		case Load_Load_mu_C:
-			return muC;
-		case Load_Load_mu_notC:
-			return 1 - muC;
-		case Load_Load_mu_notCorZ:
-			return 1 - muC | muZ;
-		case Load_Load_mu_CandnotZ:
-			return muC & 1 - muZ;
-		case Load_Load_mu_N:
-			return muN;
-		case Load_Load_mu_notN:
-			return 1 - muN;
+		case Load_Load_µ_NxorOVRorZ:
+			return (µN ^ µOVR) | µZ;
+		case Load_Load_µ_NxnorOVRornotZ:
+			return 1 - (µN ^ µOVR) & µZ;
+		case Load_Load_µ_NxorOVR:
+			return µN ^ µOVR;
+		case Load_Load_µ_NxnorOVR:
+			return 1 - (µN ^ µOVR);
+		case Load_Load_µ_Z:
+			return µZ;
+		case Load_Load_µ_notZ:
+			return 1 - µZ;
+		case Load_Load_µ_OVR:
+			return µOVR;
+		case Load_Load_µ_notOVR:
+			return 1 - µOVR;
+		case LoadCarryInvert_LoadCarryInvert_µ_CorZ:
+			return µC | µZ;
+		case LoadCarryInvert_LoadCarryInvert_µ_notCandnotZ:
+			return 1 - µC & 1 - µZ;
+		case Load_Load_µ_C:
+			return µC;
+		case Load_Load_µ_notC:
+			return 1 - µC;
+		case Load_Load_µ_notCorZ:
+			return 1 - µC | µZ;
+		case Load_Load_µ_CandnotZ:
+			return µC & 1 - µZ;
+		case Load_Load_µ_N:
+			return µN;
+		case Load_Load_µ_notN:
+			return 1 - µN;
 		case Load_Load_M_NxorOVRorZ:
 			return (MN ^ MOVR) | MZ;
 		case Load_Load_M_NxnorOVRornotZ:
@@ -233,25 +233,25 @@ public class Am2904 {
 	}
 
 	private void doSROperations() {
-		if (input._CEM == _CE_M.H && input._CEmu == _CE_mu.H)
+		if (input._CEM == _CE_M.H && input._CEµ == _CE_µ.H)
 			return;
-		srCache[0] = muZ;
-		srCache[1] = muC;
-		srCache[2] = muN;
-		srCache[3] = muOVR;
+		srCache[0] = µZ;
+		srCache[1] = µC;
+		srCache[2] = µN;
+		srCache[3] = µOVR;
 		srCache[4] = MZ;
 		srCache[5] = MC;
 		srCache[6] = MN;
 		srCache[7] = MOVR;
-		domuSROperations();
+		doµSROperations();
 		doMSROperations();
 		// this is much more readable and less error prone than mixing the calculations
 		// with the status register write restrictions
-		if (input._CEmu == _CE_mu.H) {
-			muZ = srCache[0];
-			muC = srCache[1];
-			muN = srCache[2];
-			muOVR = srCache[3];
+		if (input._CEµ == _CE_µ.H) {
+			µZ = srCache[0];
+			µC = srCache[1];
+			µN = srCache[2];
+			µOVR = srCache[3];
 		} else if (input._CEM == _CE_M.H) {
 			MZ = srCache[4];
 			MC = srCache[5];
@@ -268,74 +268,74 @@ public class Am2904 {
 			MOVR = srCache[7];
 	}
 
-	private void domuSROperations() {
+	private void doµSROperations() {
 		Am2904_Inst inst = input.mi_inst;
 		switch (inst) {
-		case LoadM_LoadY_mu_NxorOVRorZ:
-			muZ = MZ;
-			muC = MC;
-			muN = MN;
-			muOVR = MOVR;
+		case LoadM_LoadY_µ_NxorOVRorZ:
+			µZ = MZ;
+			µC = MC;
+			µN = MN;
+			µOVR = MOVR;
 			break;
-		case Set_Set_mu_NxnorOVRornotZ:
-			muZ = muC = muN = muOVR = 1;
+		case Set_Set_µ_NxnorOVRornotZ:
+			µZ = µC = µN = µOVR = 1;
 			break;
-		case Swap_Swap_mu_NxorOVR:
-			muZ ^= MZ;
-			muC ^= MC;
-			muN ^= MN;
-			muOVR ^= MOVR;
+		case Swap_Swap_µ_NxorOVR:
+			µZ ^= MZ;
+			µC ^= MC;
+			µN ^= MN;
+			µOVR ^= MOVR;
 			break;
-		case Reset_Reset_mu_NxnorOVR:
-			muZ = muC = muN = muOVR = 0;
+		case Reset_Reset_µ_NxnorOVR:
+			µZ = µC = µN = µOVR = 0;
 			break;
-		case LoadOvrRetain_Load_mu_OVR:
-		case LoadOvrRetain_Load_mu_notOVR:
-			muZ = input.IZ;
-			muC = input.IC;
-			muN = input.IN;
-			muOVR |= input.IOVR;
+		case LoadOvrRetain_Load_µ_OVR:
+		case LoadOvrRetain_Load_µ_notOVR:
+			µZ = input.IZ;
+			µC = input.IC;
+			µN = input.IN;
+			µOVR |= input.IOVR;
 			break;
-		case ResetZ_LoadCarryInvert_mu_CorZ:
-			muZ = 0;
+		case ResetZ_LoadCarryInvert_µ_CorZ:
+			µZ = 0;
 			break;
-		case SetZ_LoadCarryInvert_mu_notCandnotZ:
-			muZ = 1;
+		case SetZ_LoadCarryInvert_µ_notCandnotZ:
+			µZ = 1;
 			break;
-		case ResetC_Load_mu_C:
-			muC = 0;
+		case ResetC_Load_µ_C:
+			µC = 0;
 			break;
-		case SetC_Load_mu_notC:
-			muC = 1;
+		case SetC_Load_µ_notC:
+			µC = 1;
 			break;
-		case ResetN_Load_mu_notCorZ:
-			muN = 0;
+		case ResetN_Load_µ_notCorZ:
+			µN = 0;
 			break;
-		case SetN_Load_mu_CandnotZ:
-			muN = 1;
+		case SetN_Load_µ_CandnotZ:
+			µN = 1;
 			break;
 		case ResetOvr_Load_IM_NxorN:
-			muOVR = 0;
+			µOVR = 0;
 			break;
 		case SetOvr_Load_IM_NxnorN:
-			muOVR = 1;
+			µOVR = 1;
 			break;
-		case LoadCarryInvert_LoadCarryInvert_mu_CorZ:
-		case LoadCarryInvert_LoadCarryInvert_mu_notCandnotZ:
+		case LoadCarryInvert_LoadCarryInvert_µ_CorZ:
+		case LoadCarryInvert_LoadCarryInvert_µ_notCandnotZ:
 		case LoadCarryInvert_LoadCarryInvert_M_CorZ:
 		case LoadCarryInvert_LoadCarryInvert_M_notCandnotZ:
 		case LoadCarryInvert_LoadCarryInvert_I_notCorZ:
 		case LoadCarryInvert_LoadCarryInvert_I_CandnotZ:
-			muZ = input.IZ;
-			muC = 1 - input.IC;
-			muN = input.IN;
-			muOVR = input.IOVR;
+			µZ = input.IZ;
+			µC = 1 - input.IC;
+			µN = input.IN;
+			µOVR = input.IOVR;
 			break;
 		default:
-			muZ = input.IZ;
-			muC = input.IC;
-			muN = input.IN;
-			muOVR = input.IOVR;
+			µZ = input.IZ;
+			µC = input.IC;
+			µN = input.IN;
+			µOVR = input.IOVR;
 			break;
 		}
 	}
@@ -343,42 +343,42 @@ public class Am2904 {
 	private void doMSROperations() {
 		Am2904_Inst inst = input.mi_inst;
 		switch (inst) {
-		case LoadM_LoadY_mu_NxorOVRorZ:
+		case LoadM_LoadY_µ_NxorOVRorZ:
 			loadY3toMSR();
 			break;
-		case Set_Set_mu_NxnorOVRornotZ:
+		case Set_Set_µ_NxnorOVRornotZ:
 			MZ = MC = MN = MOVR = 1;
 			break;
-		case Swap_Swap_mu_NxorOVR:
-			MZ ^= muZ;
-			muZ ^= MZ;
-			MC ^= muC;
-			muC ^= MC;
-			MN ^= muN;
-			muN ^= MN;
-			MOVR ^= muOVR;
-			muOVR ^= MOVR;
+		case Swap_Swap_µ_NxorOVR:
+			MZ ^= µZ;
+			µZ ^= MZ;
+			MC ^= µC;
+			µC ^= MC;
+			MN ^= µN;
+			µN ^= MN;
+			MOVR ^= µOVR;
+			µOVR ^= MOVR;
 			break;
-		case Reset_Reset_mu_NxnorOVR:
+		case Reset_Reset_µ_NxnorOVR:
 			MZ = MC = MN = MOVR = 0;
 			break;
-		case Load_LoadForShiftThroughOvr_mu_Z:
+		case Load_LoadForShiftThroughOvr_µ_Z:
 			MZ = input.IZ;
 			MN = input.IN;
 			MC ^= MOVR;
 			MOVR ^= MC;
 			MC ^= MOVR;
 			break;
-		case Load_Invert_mu_notZ:
+		case Load_Invert_µ_notZ:
 			MZ = 1 - MZ;
 			MC = 1 - MC;
 			MN = 1 - MN;
 			MOVR = 1 - MOVR;
 			break;
-		case ResetZ_LoadCarryInvert_mu_CorZ:
-		case SetZ_LoadCarryInvert_mu_notCandnotZ:
-		case LoadCarryInvert_LoadCarryInvert_mu_CorZ:
-		case LoadCarryInvert_LoadCarryInvert_mu_notCandnotZ:
+		case ResetZ_LoadCarryInvert_µ_CorZ:
+		case SetZ_LoadCarryInvert_µ_notCandnotZ:
+		case LoadCarryInvert_LoadCarryInvert_µ_CorZ:
+		case LoadCarryInvert_LoadCarryInvert_µ_notCandnotZ:
 		case LoadCarryInvert_LoadCarryInvert_M_CorZ:
 		case LoadCarryInvert_LoadCarryInvert_M_notCandnotZ:
 		case LoadCarryInvert_LoadCarryInvert_I_notCorZ:
@@ -557,20 +557,20 @@ public class Am2904 {
 		}
 	}
 
-	public final int getmuC() {
-		return muC;
+	public final int getµC() {
+		return µC;
 	}
 
-	public final int getmuN() {
-		return muN;
+	public final int getµN() {
+		return µN;
 	}
 
-	public final int getmuZ() {
-		return muZ;
+	public final int getµZ() {
+		return µZ;
 	}
 
-	public final int getmuOVR() {
-		return muOVR;
+	public final int getµOVR() {
+		return µOVR;
 	}
 
 	public final int getMC() {
@@ -589,20 +589,20 @@ public class Am2904 {
 		return MOVR;
 	}
 
-	public final void setmuC(int muC) {
-		this.muC = muC & 1;
+	public final void setµC(int µC) {
+		this.µC = µC & 1;
 	}
 
-	public final void setmuN(int muN) {
-		this.muN = muN & 1;
+	public final void setµN(int µN) {
+		this.µN = µN & 1;
 	}
 
-	public final void setmuZ(int muZ) {
-		this.muZ = muZ & 1;
+	public final void setµZ(int µZ) {
+		this.µZ = µZ & 1;
 	}
 
-	public final void setmuOVR(int muOVR) {
-		this.muOVR = muOVR & 1;
+	public final void setµOVR(int µOVR) {
+		this.µOVR = µOVR & 1;
 	}
 
 	public final void setMC(int mC) {
@@ -622,10 +622,10 @@ public class Am2904 {
 	}
 
 	public void reset() {
-		setmuC(0);
-		setmuN(0);
-		setmuZ(0);
-		setmuOVR(0);
+		setµC(0);
+		setµN(0);
+		setµZ(0);
+		setµOVR(0);
 		setMC(0);
 		setMN(0);
 		setMZ(0);
@@ -645,7 +645,7 @@ class Am2904input {
 	int IOVR;
 	int IN;
 	_CE_M _CEM;
-	_CE_mu _CEmu;
+	_CE_µ _CEµ;
 	int _OEY;
 	int _OECT;
 	int _SE;

@@ -2,7 +2,7 @@ package net.maisikoleni.am2900me.logic.microinstr;
 
 import net.maisikoleni.am2900me.util.NBitsUInt;
 
-public class Am2904_Shift extends NBitsUInt implements MuIField {
+public class Am2904_Shift extends NBitsUInt implements µIField {
 	static final Am2904_Shift DEFAULT = new Am2904_Shift(0x0);
 
 	public Am2904_Shift(int uint_4bit) {

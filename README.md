@@ -8,4 +8,4 @@ This repo differs from https://github.com/MaisiKoleni/Am2900ME in the following 
 2. No dependency on JavaFX, instead dependency on SWT.
 3. MaisiKoleni's classes are "downgraded" to Java 8
 4. No maven nature; dependencies (currently only SWT) are resolved by hard-coded Eclipse-Builder "Referenced Libraries"...
-5. "µ" in names is replaced by "mu"
+5. ~~"µ" in names is replaced by "mu"~~ Not anymore... caused compability problems between JFX and SWT versions.

@@ -114,7 +114,7 @@ public class MicroinstructionsComposite extends Composite {
 		iEsM.add(14, createIP("Am2904_Carry", MicroInstruction::getAm2904_Carry, MicroInstruction::withAm2904_Carry));
 		iEsM.add(15, createIP("Am2904_Shift", 1, MicroInstruction::getAm2904_Shift, Am2904_Shift::new,
 				MicroInstruction::withAm2904_Shift));
-		iEsM.add(16, createIP("_CE_mu", MicroInstruction::getCe_mu, MicroInstruction::withCe_mu));
+		iEsM.add(16, createIP("_CE_µ", MicroInstruction::getCe_µ, MicroInstruction::withCe_µ));
 		iEsM.add(17, createIP("_CE_m", MicroInstruction::getCe_m, MicroInstruction::withCe_m));
 		iEsM.add(18, createIP("Am2904_Inst", MicroInstruction::getAm2904_Inst, MicroInstruction::withAm2904_Inst));
 		iEsM.add(19, createIP("_CCEN", MicroInstruction::getCcen, MicroInstruction::withCcen));
@@ -131,7 +131,7 @@ public class MicroinstructionsComposite extends Composite {
 	}
 
 	private final Am2900Machine machine;
-	private final MicroprogramMemory muProgMem;
+	private final MicroprogramMemory µProgMem;
 	private final ListenerManager machineStateChangedListenerManager;
 	private final ListenerManager acceptChangesListenerManager;
 
@@ -150,7 +150,7 @@ public class MicroinstructionsComposite extends Composite {
 		super(parent, SWT.NONE);
 
 		this.machine = machine;
-		this.muProgMem = machine.getMpm();
+		this.µProgMem = machine.getMpm();
 		this.machineStateChangedListenerManager = machineStateChangedListenerManager;
 		this.acceptChangesListenerManager = acceptChangesListenerManager;
 
@@ -204,15 +204,15 @@ public class MicroinstructionsComposite extends Composite {
 	}
 
 	private void setupTable() {
-		for (int i = 0; i < muProgMem.size(); i++)
-			muProgMem.setInstruction(i, MicroInstruction.DEFAULT);
+		for (int i = 0; i < µProgMem.size(); i++)
+			µProgMem.setInstruction(i, MicroInstruction.DEFAULT);
 		machineChanged();
 
 		table.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 //		table.setBackground(unchangedInstrBG);
 //		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
-		table.setItemCount(muProgMem.size());
+		table.setItemCount(µProgMem.size());
 		TableUtil.createColumn(table, "Address", 3);
 		for (InstructionProperty p : instructionProperties)
 			if (p != null)
@@ -226,7 +226,7 @@ public class MicroinstructionsComposite extends Composite {
 
 			item.setText(0, HexIntStringConverter.forNibbles(3).toString(address));
 			Runnable updateItem = () -> {
-				MicroInstruction instr = muProgMem.getInstruction(address);
+				MicroInstruction instr = µProgMem.getInstruction(address);
 				for (int i = 1; i < instructionProperties.size(); i++)
 					item.setText(i, instructionProperties.get(i).getVal.apply(instr));
 				updateItemColor(item, address);
@@ -249,7 +249,7 @@ public class MicroinstructionsComposite extends Composite {
 			InstructionProperty instrPropEditor = instructionProperties.get(column);
 			if (instrPropEditor != null)
 				if (instrPropEditor.values == null) {
-					MicroInstruction instr = muProgMem.getInstruction(address);
+					MicroInstruction instr = µProgMem.getInstruction(address);
 					Text text = new Text(cursor, SWT.NONE);
 					text.setText(instrPropEditor.getVal.apply(instr).toString());
 					text.selectAll();
@@ -300,7 +300,7 @@ public class MicroinstructionsComposite extends Composite {
 
 	private void updateItemColor(TableItem item, int address) {
 		if (item != null) {
-			MicroInstruction instr = muProgMem.getInstruction(address);
+			MicroInstruction instr = µProgMem.getInstruction(address);
 			boolean executing = machine.getCurrentMicroInstruction() == address;
 			if (executing)
 				item.setBackground(executingInstrBG);
@@ -324,8 +324,8 @@ public class MicroinstructionsComposite extends Composite {
 	}
 
 	private void updateInstr(int address, int column, TableItem item, String newVal) {
-		MicroInstruction instr = muProgMem.getInstruction(address);
-		muProgMem.setInstruction(address, instructionProperties.get(column).setVal.apply(instr, newVal));
+		MicroInstruction instr = µProgMem.getInstruction(address);
+		µProgMem.setInstruction(address, instructionProperties.get(column).setVal.apply(instr, newVal));
 		machineChanged();
 	}
 
@@ -359,8 +359,8 @@ public class MicroinstructionsComposite extends Composite {
 		String filename = openFileDialog(SWT.SAVE);
 		if (filename != null)
 			try (PrintWriter out = new PrintWriter(filename)) {
-				for (int addr = 0; addr < muProgMem.size(); addr++) {
-					MicroInstruction instr = muProgMem.getInstruction(addr);
+				for (int addr = 0; addr < µProgMem.size(); addr++) {
+					MicroInstruction instr = µProgMem.getInstruction(addr);
 					out.print(HexIntStringConverter.INT_12.toString(addr));
 					for (int col = 1; col < instructionProperties.size(); col++) {
 						out.print(',');
@@ -414,7 +414,7 @@ public class MicroinstructionsComposite extends Composite {
 											errorLines.add(lineIndex);
 										}
 									}
-									muProgMem.setInstruction(addr, instr);
+									µProgMem.setInstruction(addr, instr);
 								}
 							} catch (Exception e) {
 								errorMessages.add("Unexpected error: " + e);

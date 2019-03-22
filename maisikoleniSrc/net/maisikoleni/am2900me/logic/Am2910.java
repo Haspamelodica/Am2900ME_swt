@@ -17,7 +17,7 @@ public class Am2910 {
 	private int stackPointer;
 	private int registerCounter;
 	private int incrementerSignal;
-	private int muPC;
+	private int µPC;
 
 	final Am2910input input = new Am2910input();
 	final Am2910output output = new Am2910output();
@@ -28,7 +28,7 @@ public class Am2910 {
 	 * @author MaisiKoleni
 	 */
 	public void processStep1() {
-		muPC = incrementerSignal;
+		µPC = incrementerSignal;
 		switch (input.mi_inst) {
 		case JZ:
 		case CJS:
@@ -90,18 +90,18 @@ public class Am2910 {
 				pushStack();
 				return input.D;
 			}
-			return muPC;
+			return µPC;
 		case JMAP:
 			return input.D;
 		case CJP:
 			if (passed)
 				return input.D;
-			return muPC;
+			return µPC;
 		case PUSH:
 			pushStack();
 			if (passed)
 				registerCounter = input.D;
-			return muPC;
+			return µPC;
 		case JSRP:
 			pushStack();
 			if (passed)
@@ -110,7 +110,7 @@ public class Am2910 {
 		case CJV:
 			if (passed)
 				registerCounter = input.D;
-			return muPC;
+			return µPC;
 		case JRP:
 			if (passed)
 				registerCounter = input.D;
@@ -118,12 +118,12 @@ public class Am2910 {
 		case RFCT:
 			if (regCounterZero) {
 				popStack();
-				return muPC;
+				return µPC;
 			}
 			return --registerCounter;
 		case RPCT:
 			if (regCounterZero) {
-				return muPC;
+				return µPC;
 			}
 			registerCounter--;
 			return input.D;
@@ -132,33 +132,33 @@ public class Am2910 {
 				popStack();
 				return registerCounter;
 			}
-			return muPC;
+			return µPC;
 		case CJPP:
 			if (passed) {
 				popStack();
 				return input.D;
 			}
-			return muPC;
+			return µPC;
 		case LDCT:
 			registerCounter = input.D;
-			return muPC;
+			return µPC;
 		case LOOP:
 			if (passed) {
 				popStack();
-				return muPC;
+				return µPC;
 			}
 			return registerCounter;
 		case CONT:
-			return muPC;
+			return µPC;
 		case TWB:
 			if (regCounterZero) {
 				popStack();
-				return passed ? muPC : input.D;
+				return passed ? µPC : input.D;
 			}
 			registerCounter--;
 			if (passed) {
 				popStack();
-				return muPC;
+				return µPC;
 			}
 			return registerCounter;
 		default:
@@ -167,19 +167,19 @@ public class Am2910 {
 	}
 
 	/**
-	 * Pushes the muPC on the stack. If the stack is full, the top gets overwritten.
+	 * Pushes the µPC on the stack. If the stack is full, the top gets overwritten.
 	 * 
 	 * @author MaisiKoleni
 	 */
 	private void pushStack() {
 		if (stackPointer == 5)
-			stack[4] = muPC;
+			stack[4] = µPC;
 		else
-			stack[stackPointer++] = muPC;
+			stack[stackPointer++] = µPC;
 	}
 
 	/**
-	 * Pops the last muPC from the stack and returns it. If the stack is empty, the
+	 * Pops the last µPC from the stack and returns it. If the stack is empty, the
 	 * result is undefined
 	 * 
 	 * @author MaisiKoleni
@@ -198,17 +198,17 @@ public class Am2910 {
 		return registerCounter;
 	}
 
-	public final int getmuPC() {
-		return muPC;
+	public final int getµPC() {
+		return µPC;
 	}
 
 	public final void setRegisterCounter(int registerCounter) {
 		this.registerCounter = registerCounter & 0xFFF;
 	}
 
-	public final void setmuPC(int muPC) {
-		this.incrementerSignal = muPC & 0xFFF;
-		this.muPC = muPC & 0xFFF;
+	public final void setµPC(int µPC) {
+		this.incrementerSignal = µPC & 0xFFF;
+		this.µPC = µPC & 0xFFF;
 	}
 
 	public final int getStackPointer() {
@@ -229,7 +229,7 @@ public class Am2910 {
 
 	public void reset() {
 		clearStack();
-		setmuPC(0);
+		setµPC(0);
 		setRegisterCounter(0);
 	}
 }

@@ -1,6 +1,6 @@
 package net.maisikoleni.am2900me.logic.microinstr;
 
-public enum IE implements MuIField {
+public enum IE implements µIField {
 	IE,
 	DIS;
 
